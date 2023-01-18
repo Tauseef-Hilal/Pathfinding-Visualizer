@@ -16,12 +16,13 @@ pygame.display.set_caption("Pathfinder")
 
 CLOCK = pygame.time.Clock()
 
+
 def main() -> None:
     """
     Start here
     """
 
-    maze = Maze()
+    maze = Maze(surface=WINDOW)
 
     while True:
         for event in pygame.event.get():
@@ -30,7 +31,10 @@ def main() -> None:
                 sys.exit()
 
         WINDOW.fill(WHITE)
-        maze.draw(WINDOW)
 
+        maze.draw()
+        maze.solve()
+
+        pygame.time.delay(5000)
         pygame.display.update()
         CLOCK.tick(FPS)
