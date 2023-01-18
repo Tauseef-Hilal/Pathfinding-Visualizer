@@ -1,2 +1,3 @@
 # Pathfinder
-Pathfinder visualization with Python and Pygame
+
+Pathfinder visualization with Python and Pygame.
