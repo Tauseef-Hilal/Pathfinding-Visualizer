@@ -5,7 +5,7 @@
 
 import pygame
 
-from src.constants import HEIGHT, WIDTH
+from src.constants import BLACK, HEIGHT, WIDTH
 
 
 class Button:
@@ -18,14 +18,17 @@ class Button:
             y: float | str,
             padding: float = 5,
             font_size: int = 20,
+            bold: bool = False,
+            outline: bool = False,
             foreground_color: pygame.Color = pygame.Color(0, 0, 0),
             background_color: pygame.Color = pygame.Color(255, 255, 255)
     ):
         self.text = text
         self.padding = padding
         self.background_color = background_color
+        self.outline = outline
 
-        font = pygame.font.SysFont("Verdana", font_size)
+        font = pygame.font.SysFont("Verdana", font_size, bold)
 
         self.text_surf = font.render(
             self.text, True, foreground_color
@@ -58,6 +61,8 @@ class Button:
 
         # Draw button
         pygame.draw.rect(surf, self.background_color, self.rect)
+        if self.outline:
+            pygame.draw.rect(surf, BLACK, self.rect, width=self.outline)
 
         text_x, text_y = self.rect.x + self.padding, self.rect.y + self.padding
         surf.blit(self.text_surf, (text_x, text_y))

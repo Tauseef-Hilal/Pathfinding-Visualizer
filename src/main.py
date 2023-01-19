@@ -6,6 +6,7 @@ from src.button import Button
 
 from .constants import (
     BLACK,
+    BLUE,
     DARK,
     WHITE,
     GREEN,
@@ -25,7 +26,7 @@ pygame.display.set_caption("Pathfinder")
 CLOCK = pygame.time.Clock()
 
 title_font = pygame.font.SysFont("Verdana", 40, True)
-title_surf = title_font.render("PATHFINDER", True, BLACK)
+title_surf = title_font.render("PATHFINDER", True, DARK)
 
 
 def main() -> None:
@@ -39,10 +40,10 @@ def main() -> None:
 
     maze = Maze(surface=WINDOW, filename=maze_list[maze_idx])
     button = Button(
-        "Start", "center", HEIGHT - 80,
-        background_color=pygame.Color(*GREEN),
-        foreground_color=pygame.Color(*WHITE),
-        padding=6, font_size=30
+        "START", "center", HEIGHT - 80,
+        background_color=pygame.Color(*DARK),
+        foreground_color=pygame.Color(*BLUE),
+        padding=6, font_size=24, outline=True
     )
 
     next_btn = Button(
@@ -50,6 +51,7 @@ def main() -> None:
         x=WIDTH - 40,
         y="center",
         font_size=30,
+        bold=True,
         background_color=pygame.Color(*WHITE)
     )
 
@@ -58,6 +60,7 @@ def main() -> None:
         x=5,
         y="center",
         font_size=30,
+        bold=True,
         background_color=pygame.Color(*WHITE)
     )
 
@@ -71,7 +74,7 @@ def main() -> None:
 
         WINDOW.blit(title_surf, ((WIDTH - title_surf.get_width()) / 2, 20))
         maze.draw()
-        
+
         if button.draw(WINDOW):
             maze.solve()
             pygame.time.delay(5000)
