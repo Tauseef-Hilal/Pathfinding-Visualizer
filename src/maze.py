@@ -3,6 +3,7 @@ import pygame
 from src.button import Button
 
 from src.unnamed.base import Node
+from src.unnamed.bfs import StackFrontier
 from src.unnamed.dfs import QueueFrontier
 
 from .constants import (
@@ -21,22 +22,20 @@ from .constants import (
 
 
 class Maze:
-    def __init__(self, surface):
-        self.maze = self._generate_maze()
+    def __init__(self, surface, filename):
+        self.maze = self._generate_maze(filename)
         self.width = max(len(row) for row in self.maze)
         self.height = len(self.maze)
         self.coords = self._generate_coordinates()
         self.surface = surface
 
-    def _generate_maze(self):
+    def _generate_maze(self, filename):
         maze: list[list[str]] = []
-        filename = "data/maze/maze2.txt"
-        # filename = f"data/maze/maze{str(choice((1, 2, 3)))}.txt"
 
         with open(filename) as file:
             content = file.read()
 
-            for i, line in enumerate(content.splitlines()):
+            for line in content.splitlines():
                 maze.append(list(line))
 
         return maze
@@ -105,7 +104,7 @@ class Maze:
         explored_states = set()
 
         while True:
-            pygame.time.delay(100)
+            pygame.time.delay(60)
             if frontier.empty():
                 msg = Button("NO SOLUTION!", "center", "center",
                              12, 70, pygame.Color(*RED), pygame.Color(*DARK))
