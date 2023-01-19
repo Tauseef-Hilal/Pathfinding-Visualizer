@@ -50,7 +50,8 @@ def main() -> None:
         WINDOW.blit(title_surf, ((WIDTH - title_surf.get_width()) / 2, 20))
         maze.draw()
         if button.draw(WINDOW):
-            maze.solve()
+            solved = maze.solve()
+            pygame.time.delay(5000)
 
         pygame.display.update()
         CLOCK.tick(FPS)

@@ -1,12 +1,15 @@
 import time
 import pygame
+from src.button import Button
 
 from src.unnamed.base import Node
 from src.unnamed.dfs import QueueFrontier
 
 from .constants import (
+    BLUE,
     CELL_SIZE,
     DARK,
+    REDLIKE,
     WHITE,
     GREEN,
     BLACK,
@@ -104,17 +107,36 @@ class Maze:
         while True:
             pygame.time.delay(100)
             if frontier.empty():
-                print("No Solution")
-                return
+                msg = Button("NO SOLUTION!", "center", "center",
+                             12, 70, pygame.Color(*RED), pygame.Color(*DARK))
+                msg.draw(surf=self.surface)
+                pygame.display.update()
 
-            self._draw_rect(node=node)
-            pygame.display.update()
+                return False
+
+            if node.parent:
+                self._draw_rect(coords=node.state)
+                pygame.display.update()
 
             node = frontier.remove()
 
             if node.state == self.goal:
-                print("DONE")
-                return
+                cells = set()
+                temp = node.parent
+                while temp.parent != None:
+                    cells.add(temp.state)
+                    temp = temp.parent
+
+                for cell in explored_states:
+                    if cell in cells:
+                        self._draw_rect(coords=cell, color=BLUE)
+                        continue
+
+                    self._draw_rect(coords=cell, color=REDLIKE)
+
+                pygame.display.update()
+
+                return True
 
             explored_states.add(node.state)
 
@@ -129,13 +151,13 @@ class Maze:
                     continue
                 frontier.add(node=new)
 
-    def _draw_rect(self, node):
-        row, col = node.state
+    def _draw_rect(self, coords: tuple[int, int], color: tuple = YELLOW):
+        row, col = coords
         x, y = self.coords[row][col]
 
         pygame.draw.rect(
             surface=self.surface,
-            color=YELLOW,
+            color=color,
             rect=pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
         )
 

@@ -6,6 +6,7 @@ REDLIKE = (212, 97, 85)
 GREEN = (0, 194, 25)
 YELLOW = (220, 235, 113)
 WHITE = (238, 240, 252)
+BLUE = (97, 175, 238)
 
 # Maze
 CELL_SIZE = 30
