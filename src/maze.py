@@ -1,10 +1,9 @@
-import time
 import pygame
-from src.button import Button
 
-from src.unnamed.base import Node
-from src.unnamed.bfs import StackFrontier
-from src.unnamed.dfs import QueueFrontier
+from .button import Button
+from .pathfinder.models.search_types import Search
+from .pathfinder.models.grid import Grid
+from .pathfinder.main import PathFinder
 
 from .constants import (
     BLUE,
@@ -96,61 +95,29 @@ class Maze:
                 )
 
     def solve(self):
-        node = Node(state=self.start, parent=None, action=None)
+        grid = Grid(self.maze, self.start, self.goal)
+        solution = PathFinder.find_path(
+            grid=grid,
+            search=Search.BREADTH_FIRST_SEARCH,
+            callback=self._draw_rect
+        )
 
-        frontier = QueueFrontier()
-        frontier.add(node)
+        if solution.path:
+            for cell in solution.path[1:-1]:
+                self._draw_rect(coords=cell, color=BLUE)
 
-        explored_states = set()
+            pygame.display.update()
+            return
 
-        while True:
-            pygame.time.delay(60)
-            if frontier.empty():
-                msg = Button("NO SOLUTION!", "center", "center",
-                             12, 70, pygame.Color(*RED), pygame.Color(*DARK))
-                msg.draw(surf=self.surface)
-                pygame.display.update()
+        msg = Button(
+            "NO SOLUTION!", "center", "center",
+            12, 70, foreground_color=pygame.Color(*RED), background_color=pygame.Color(*DARK)
+        )
 
-                return False
+        msg.draw(surf=self.surface)
+        pygame.display.update()
 
-            if node.parent:
-                self._draw_rect(coords=node.state)
-                pygame.display.update()
-
-            node = frontier.remove()
-
-            if node.state == self.goal:
-                cells = set()
-                temp = node.parent
-                while temp.parent != None:
-                    cells.add(temp.state)
-                    temp = temp.parent
-
-                for cell in explored_states:
-                    if cell in cells:
-                        self._draw_rect(coords=cell, color=BLUE)
-                        continue
-
-                    self._draw_rect(coords=cell, color=REDLIKE)
-
-                pygame.display.update()
-
-                return True
-
-            explored_states.add(node.state)
-
-            for action, state in self._get_actions(node.state).items():
-                new = Node(
-                    state=state,
-                    parent=node,
-                    action=action
-                )
-
-                if state in explored_states or frontier.contains_state(state):
-                    continue
-                frontier.add(node=new)
-
-    def _draw_rect(self, coords: tuple[int, int], color: tuple = YELLOW):
+    def _draw_rect(self, coords: tuple[int, int], color=YELLOW, delay=False):
         row, col = coords
         x, y = self.coords[row][col]
 
@@ -166,6 +133,10 @@ class Maze:
             rect=pygame.Rect(x, y, CELL_SIZE, CELL_SIZE),
             width=1
         )
+
+        if delay:
+            pygame.time.delay(50)
+            pygame.display.update()
 
     def _get_actions(self, state) -> dict[str, tuple[int, int]]:
         row, col = state
