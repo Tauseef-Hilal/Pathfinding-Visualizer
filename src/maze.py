@@ -9,7 +9,6 @@ from .constants import (
     BLUE,
     CELL_SIZE,
     DARK,
-    REDLIKE,
     WHITE,
     GREEN,
     BLACK,
@@ -137,24 +136,3 @@ class Maze:
         if delay:
             pygame.time.delay(50)
             pygame.display.update()
-
-    def _get_actions(self, state) -> dict[str, tuple[int, int]]:
-        row, col = state
-        action_state_mapper = {
-            "up": (row - 1, col),
-            "down": (row + 1, col),
-            "left": (row, col - 1),
-            "right": (row, col + 1),
-        }
-
-        possible_actions = {}
-        for action, (r, c) in action_state_mapper.items():
-            if not (0 <= r < self.height and 0 <= c < self.width):
-                continue
-
-            if self.maze[r][c] == "#":
-                continue
-
-            possible_actions[action] = (r, c)
-
-        return possible_actions

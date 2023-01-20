@@ -16,7 +16,7 @@ class StackFrontier(Frontier):
 
 class DepthFirstSearch:
     @staticmethod
-    def search(grid: Grid, callback: Optional[Visualiser]):
+    def search(grid: Grid, callback: Optional[Visualiser]) -> Solution:
         node = Node(state=grid.start, parent=None, action=None)
 
         frontier = StackFrontier()
