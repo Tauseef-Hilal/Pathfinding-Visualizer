@@ -1,14 +1,23 @@
 from typing import Optional
-from src.pathfinder.main import Visualiser
-from src.pathfinder.models.solution import NoSolution, Solution
+
+from ..types import Visualiser
 from ..models.node import Node
 from ..models.grid import Grid
 from ..models.frontier import Frontier
+from ..models.solution import NoSolution, Solution
 
 
 class StackFrontier(Frontier):
-    def remove(self):
-        if self.empty():
+    def remove(self) -> Node:
+        """Remove element from the stack
+
+        Raises:
+            Exception: Empty Frontier
+
+        Returns:
+            Node: Cell (Node) in a matrix
+        """
+        if self.is_empty():
             raise Exception("Empty Frontier")
         else:
             return self.frontier.pop()
@@ -17,36 +26,59 @@ class StackFrontier(Frontier):
 class DepthFirstSearch:
     @staticmethod
     def search(grid: Grid, callback: Optional[Visualiser]) -> Solution:
+        """Find path between two points in a grid using Depth First Search
+
+        Args:
+            grid (Grid): Grid of points
+            callback (Optional[Visualiser], optional): Callback for 
+            visualisation. Defaults to None.
+
+        Returns:
+            Solution: Solution found
+        """
+
+        # Create Node for the source cell
         node = Node(state=grid.start, parent=None, action=None)
 
+        # Instantiate Frontier and add node into it
         frontier = StackFrontier()
         frontier.add(node)
 
+        # Keep track of explored positions
         explored_states = set()
 
-        ctr = 0
         while True:
-            if frontier.empty():
+            # Return empty Solution object for no solution
+            if frontier.is_empty():
                 return NoSolution([], set())
 
+            # Call the visualiser function, if provider
             if node.parent and callback:
                 callback(node.state, delay=True)
 
+            # Remove node from the frontier
             node = frontier.remove()
-            ctr += 1
 
+            # If reached destination point
             if node.state == grid.end:
+
+                # Generate path and return a Solution object
                 cells = []
+
                 temp = node
                 while temp.parent != None:
                     cells.append(temp.state)
                     temp = temp.parent
+
                 cells.append(grid.start)
                 cells.reverse()
+
                 return Solution(cells, explored_states)
 
+            # Add current node position the explored set
             explored_states.add(node.state)
 
+            # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():
                 new = Node(
                     state=state,
@@ -56,4 +88,5 @@ class DepthFirstSearch:
 
                 if state in explored_states or frontier.contains_state(state):
                     continue
+
                 frontier.add(node=new)

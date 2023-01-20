@@ -1,7 +1,7 @@
 from typing import Optional, Protocol
-from src.pathfinder.models.grid import Grid
 
-from src.pathfinder.models.solution import NoSolution, Solution
+from .models.grid import Grid
+from .models.solution import NoSolution, Solution
 
 
 class Visualiser(Protocol):
@@ -11,6 +11,14 @@ class Visualiser(Protocol):
         color: tuple[int, int, int] = (220, 235, 113),
         delay: bool = False
     ) -> None:
+        """Callback for visualisation. Run every new cell traversal
+
+        Args:
+            coords (tuple[int, int]): Cell coordinates
+            color (tuple[int, int, int], optional): Color. Defaults to 
+            (220, 235, 113).
+            delay (bool, optional): Delay after execution. Defaults to False.
+        """
         return
 
 
@@ -18,7 +26,16 @@ class SearchFunction(Protocol):
     def __call__(
         self,
         grid: Grid,
-        callback:
-        Optional[Visualiser] = None
+        callback: Optional[Visualiser] = None
     ) -> Solution:
+        """Find path between two points in a grid using a searching algorithm
+
+        Args:
+            grid (Grid): Grid of points
+            callback (Optional[Visualiser], optional): Callback for 
+            visualisation. Defaults to None.
+
+        Returns:
+            Solution: Solution found
+        """
         return NoSolution([], set())

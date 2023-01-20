@@ -1,9 +1,9 @@
-from .types import SearchFunction, Visualiser
+from .models.grid import Grid
+from .models.solution import Solution
 from .models.search_types import Search
 from .search.dfs import DepthFirstSearch
 from .search.bfs import BreadthFirstSearch
-from .models.grid import Grid
-from .models.solution import Solution
+from .types import SearchFunction, Visualiser
 
 SEARCH: dict[Search, SearchFunction] = {
     Search.BREADTH_FIRST_SEARCH: BreadthFirstSearch.search,
