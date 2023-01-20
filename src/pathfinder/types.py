@@ -21,4 +21,4 @@ class SearchFunction(Protocol):
         callback:
         Optional[Visualiser] = None
     ) -> Solution:
-        return NoSolution([], 0)
+        return NoSolution([], set())

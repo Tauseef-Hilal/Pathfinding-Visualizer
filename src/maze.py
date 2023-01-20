@@ -9,6 +9,7 @@ from .constants import (
     BLUE,
     CELL_SIZE,
     DARK,
+    REDLIKE,
     WHITE,
     GREEN,
     BLACK,
@@ -93,17 +94,27 @@ class Maze:
                     width=1
                 )
 
-    def solve(self):
+    def solve(self, algo_name: str):
+        mapper: dict[str, Search] = {
+            "Breadth First Search": Search.BREADTH_FIRST_SEARCH,
+            "Depth First Search": Search.DEPTH_FIRST_SEARCH,
+        }
         grid = Grid(self.maze, self.start, self.goal)
         solution = PathFinder.find_path(
             grid=grid,
-            search=Search.BREADTH_FIRST_SEARCH,
+            search=mapper[algo_name.strip()],
             callback=self._draw_rect
         )
 
         if solution.path:
             for cell in solution.path[1:-1]:
                 self._draw_rect(coords=cell, color=BLUE)
+                
+            explored = list(solution.explored)
+            path = set(solution.path)
+            for cell in explored:
+                if cell not in path:
+                    self._draw_rect(coords=cell, color=REDLIKE)
 
             pygame.display.update()
             return

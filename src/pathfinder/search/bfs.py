@@ -28,7 +28,7 @@ class BreadthFirstSearch:
         ctr = 0
         while True:
             if frontier.empty():
-                return NoSolution([], 0)
+                return NoSolution([], set())
 
             if node.parent and callback:
                 callback(node.state, delay=True)
@@ -44,7 +44,7 @@ class BreadthFirstSearch:
                     temp = temp.parent
                 cells.append(grid.start)
                 cells.reverse()
-                return Solution(cells, ctr)
+                return Solution(cells, explored_states)
 
             explored_states.add(node.state)
 
