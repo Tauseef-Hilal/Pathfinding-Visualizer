@@ -35,7 +35,7 @@ class Frontier:
         return len(self.frontier) == 0
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(){self.frontier}"
+        return f"{self.__class__.__name__}()"
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__} => {self.frontier}"

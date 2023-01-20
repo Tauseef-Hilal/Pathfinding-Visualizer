@@ -110,6 +110,7 @@ def main() -> None:
         foreground_color=pygame.Color(*BLUE),
         padding=6, font_size=24, outline=True
     )
+    print(button)
 
     button.rect.x -= button.rect.width
 

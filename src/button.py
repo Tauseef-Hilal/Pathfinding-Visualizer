@@ -8,7 +8,7 @@ from .constants import (
 
 
 class Button:
-    """Model a button (Can be used to for labels)"""
+    """Model a button (Can be used for creating labels)"""
 
     def __init__(
             self,
@@ -85,3 +85,6 @@ class Button:
         surf.blit(self.text_surf, (text_x, text_y))
 
         return action
+
+    def __repr__(self) -> str:
+        return f"Button{tuple(vars(self).values())!r}"
