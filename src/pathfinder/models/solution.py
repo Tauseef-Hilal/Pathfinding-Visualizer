@@ -17,4 +17,5 @@ class NoSolution(Solution):
     """Model an empty pathfinding solution"""
 
     def __repr__(self) -> str:
-        return f"Solution([], {'{ }'})"
+        explored = list(self.explored)
+        return f"Solution([], {'{'}{explored[0]}, {explored[1]}, ...{'}'})"

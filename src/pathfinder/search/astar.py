@@ -34,7 +34,7 @@ class AStarSearch:
         # Keep track of explored positions
         explored_states = set()
 
-        while frontier:
+        while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
                 return NoSolution([], explored_states)
@@ -82,8 +82,6 @@ class AStarSearch:
                     priority=new.distance_from_start +
                     AStarSearch.heuristic(state, grid.end)
                 )
-
-        return NoSolution([], explored_states)
 
     @staticmethod
     def heuristic(state: tuple[int, int], goal: tuple[int, int]) -> int:
