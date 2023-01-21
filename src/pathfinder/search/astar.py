@@ -1,16 +1,18 @@
+from __future__ import annotations
 from typing import Optional
 
+
 from ..types import Visualiser
-from ..models.node import Node
+from ..models.frontier import PriorityQueueFrontier
+from ..models.node import AStarNode
 from ..models.grid import Grid
-from ..models.frontier import QueueFrontier
 from ..models.solution import NoSolution, Solution
 
 
-class BreadthFirstSearch:
+class AStarSearch:
     @staticmethod
     def search(grid: Grid, callback: Optional[Visualiser] = None) -> Solution:
-        """Find path between two points in a grid using Breadth First Search
+        """Find path between two points in a grid using A* Search
 
         Args:
             grid (Grid): Grid of points
@@ -22,26 +24,27 @@ class BreadthFirstSearch:
         """
 
         # Create Node for the source cell
-        node = Node(state=grid.start, parent=None, action=None)
+        node = AStarNode(state=grid.start, parent=None,
+                         action=None, distance_from_start=0)
 
-        # Instantiate Frontier and add node into it
-        frontier = QueueFrontier()
+        # Instantiate PriorityQueue frontier and add node into it
+        frontier = PriorityQueueFrontier()
         frontier.add(node)
 
         # Keep track of explored positions
         explored_states = set()
 
-        while True:
+        while frontier:
             # Return empty Solution object for no solution
             if frontier.is_empty():
-                return NoSolution([], set())
+                return NoSolution([], explored_states)
 
             # Call the visualiser function, if provided
             if node.parent and callback:
                 callback(node.state, delay=True)
 
             # Remove node from the frontier
-            node = frontier.remove()
+            node = frontier.pop()
 
             # If reached destination point
             if node.state == grid.end:
@@ -64,13 +67,36 @@ class BreadthFirstSearch:
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():
-                new = Node(
+                new = AStarNode(
                     state=state,
                     parent=node,
-                    action=action
+                    action=action,
+                    distance_from_start=node.distance_from_start + 1
                 )
 
                 if state in explored_states or frontier.contains_state(state):
                     continue
 
-                frontier.add(node=new)
+                frontier.add(
+                    new,
+                    priority=new.distance_from_start +
+                    AStarSearch.heuristic(state, grid.end)
+                )
+
+        return NoSolution([], explored_states)
+
+    @staticmethod
+    def heuristic(state: tuple[int, int], goal: tuple[int, int]) -> int:
+        """Heuristic function for edtimating remaining distance
+
+        Args:
+            state (tuple[int, int]): Initial
+            goal (tuple[int, int]): Final
+
+        Returns:
+            int: Distance
+        """
+        row, col = state
+        goal_row, goal_col = goal
+
+        return max(abs(goal_row - row), abs(goal_col - col))

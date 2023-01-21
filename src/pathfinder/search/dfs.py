@@ -3,24 +3,8 @@ from typing import Optional
 from ..types import Visualiser
 from ..models.node import Node
 from ..models.grid import Grid
-from ..models.frontier import Frontier
+from ..models.frontier import StackFrontier
 from ..models.solution import NoSolution, Solution
-
-
-class StackFrontier(Frontier):
-    def remove(self) -> Node:
-        """Remove element from the stack
-
-        Raises:
-            Exception: Empty Frontier
-
-        Returns:
-            Node: Cell (Node) in a matrix
-        """
-        if self.is_empty():
-            raise Exception("Empty Frontier")
-        else:
-            return self.frontier.pop()
 
 
 class DepthFirstSearch:
@@ -52,7 +36,7 @@ class DepthFirstSearch:
             if frontier.is_empty():
                 return NoSolution([], set())
 
-            # Call the visualiser function, if provider
+            # Call the visualiser function, if provided
             if node.parent and callback:
                 callback(node.state, delay=True)
 

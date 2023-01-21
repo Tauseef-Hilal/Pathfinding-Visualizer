@@ -3,11 +3,13 @@ from .models.solution import Solution
 from .models.search_types import Search
 from .search.dfs import DepthFirstSearch
 from .search.bfs import BreadthFirstSearch
+from .search.astar import AStarSearch
 from .types import SearchFunction, Visualiser
 
 SEARCH: dict[Search, SearchFunction] = {
     Search.BREADTH_FIRST_SEARCH: BreadthFirstSearch.search,
     Search.DEPTH_FIRST_SEARCH: DepthFirstSearch.search,
+    Search.ASTAR_SEARCH: AStarSearch.search,
 }
 
 

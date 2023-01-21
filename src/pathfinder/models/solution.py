@@ -10,9 +10,11 @@ class Solution:
         self.explored = explored
 
     def __repr__(self) -> str:
-        return f"Solution([{self.path[0]}, ..., {self.path[-1]}], [...])"
+        return f"Solution([{self.path[0]}, ..., {self.path[-1]}], {'{...}'})"
 
 
 class NoSolution(Solution):
     """Model an empty pathfinding solution"""
-    pass
+
+    def __repr__(self) -> str:
+        return f"Solution([], {'{ }'})"

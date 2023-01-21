@@ -12,7 +12,7 @@ class Grid:
         # Calculate grid dimensions
         self.width = max(len(row) for row in grid)
         self.height = len(grid)
-
+    
     def get_neighbours(
             self,
             pos: tuple[int, int]
