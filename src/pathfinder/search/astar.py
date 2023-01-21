@@ -14,6 +14,8 @@ class AStarSearch:
     def search(grid: Grid, callback: Optional[Visualiser] = None) -> Solution:
         """Find path between two points in a grid using A* Search
 
+        NOT SURE ABOUT THIS SOLUTION!!!
+
         Args:
             grid (Grid): Grid of points
             callback (Optional[Visualiser], optional): Callback for 
