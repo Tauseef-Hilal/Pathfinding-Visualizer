@@ -211,5 +211,5 @@ class Maze:
 
         # Wait for 50ms
         if delay:
-            pygame.time.delay(50)
+            pygame.time.delay(20)
             pygame.display.update()

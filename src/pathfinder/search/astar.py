@@ -4,7 +4,7 @@ from typing import Optional
 
 from ..types import Visualiser
 from ..models.frontier import PriorityQueueFrontier
-from ..models.node import AStarNode
+from ..models.node import Node, Node
 from ..models.grid import Grid
 from ..models.solution import NoSolution, Solution
 
@@ -15,6 +15,8 @@ class AStarSearch:
         """Find path between two points in a grid using A* Search
 
         NOT SURE ABOUT THIS SOLUTION!!!
+        Tried to copy from Leetcode:
+        https://leetcode.com/problems/shortest-path-in-binary-matrix/solutions/313347/A*-search-in-Python/
 
         Args:
             grid (Grid): Grid of points
@@ -26,8 +28,7 @@ class AStarSearch:
         """
 
         # Create Node for the source cell
-        node = AStarNode(state=grid.start, parent=None,
-                         action=None, distance_from_start=0)
+        node = Node(state=grid.start, parent=None, action=None)
 
         # Instantiate PriorityQueue frontier and add node into it
         frontier = PriorityQueueFrontier()
@@ -35,18 +36,18 @@ class AStarSearch:
 
         # Keep track of explored positions
         explored_states = set()
+        distance = {grid.start: 0}
 
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
                 return NoSolution([], explored_states)
 
-            # Call the visualiser function, if provided
-            if node.parent and callback:
-                callback(node.state, delay=True)
-
             # Remove node from the frontier
             node = frontier.pop()
+
+            if node.state in explored_states:
+                continue
 
             # If reached destination point
             if node.state == grid.end:
@@ -64,26 +65,31 @@ class AStarSearch:
 
                 return Solution(cells, explored_states)
 
+            # Call the visualiser function, if provided
+            if node.parent and callback:
+                callback(node.state, delay=True)
+
             # Add current node position into the explored set
             explored_states.add(node.state)
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():
-                new = AStarNode(
+                new = Node(
                     state=state,
-                    parent=node,
+                    parent=None,
                     action=action,
-                    distance_from_start=node.distance_from_start + 1
                 )
-
-                if state in explored_states or frontier.contains_state(state):
-                    continue
 
                 frontier.add(
                     new,
-                    priority=new.distance_from_start +
-                    AStarSearch.heuristic(state, grid.end)
+                    priority=distance[node.state] + 1
+                    + AStarSearch.heuristic(state, grid.end)
                 )
+
+                if (state not in distance
+                        or distance[node.state] + 1 < distance[state]):
+                    distance[state] = distance[node.state] + 1
+                    new.parent = node
 
     @staticmethod
     def heuristic(state: tuple[int, int], goal: tuple[int, int]) -> int:

@@ -34,6 +34,10 @@ class Grid:
             "down": (row + 1, col),
             "left": (row, col - 1),
             "right": (row, col + 1),
+            # "upleft": (row - 1, col - 1),
+            # "upright": (row - 1, col + 1),
+            # "downleft": (row + 1, col - 1),
+            # "downright": (row + 1, col + 1),
         }
 
         # Determine possilbe actions

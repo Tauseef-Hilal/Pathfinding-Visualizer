@@ -1,6 +1,6 @@
 from heapq import heappush, heappop
 
-from .node import AStarNode, Node
+from .node import Node
 
 
 class Frontier:
@@ -77,9 +77,9 @@ class QueueFrontier(Frontier):
 
 class PriorityQueueFrontier(Frontier):
     def __init__(self):
-        self.frontier: list[tuple[int, AStarNode]] = []
+        self.frontier: list[tuple[int, Node]] = []
 
-    def add(self, node: AStarNode, priority: int = 0) -> None:
+    def add(self, node: Node, priority: int = 0) -> None:
         """Add a new node into the frontier
 
         Args:
@@ -88,7 +88,7 @@ class PriorityQueueFrontier(Frontier):
         """
         heappush(self.frontier, (priority, node))
 
-    def pop(self) -> AStarNode:
+    def pop(self) -> Node:
         """Remove a node from the frontier
 
         Returns:
@@ -96,14 +96,3 @@ class PriorityQueueFrontier(Frontier):
         """
         _, node = heappop(self.frontier)
         return node
-    
-    def contains_state(self, state: tuple[int, int]) -> bool:
-        """Check if a state exists in the frontier
-
-        Args:
-            state (tuple[int, int]): Postion of a node
-
-        Returns:
-            bool: Whether the provided state exists
-        """
-        return any(node.state == state for _, node in self.frontier)
