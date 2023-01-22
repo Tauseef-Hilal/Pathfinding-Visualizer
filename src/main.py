@@ -79,14 +79,14 @@ def main() -> None:
             foreground_color=pygame.Color(*BLUE),
             padding=6, font_size=24, outline=True
         ),
-        Button(
-            text="     A*  Search     ",
-            x=130,
-            y=HEIGHT - 80,
-            background_color=pygame.Color(*DARK),
-            foreground_color=pygame.Color(*BLUE),
-            padding=6, font_size=24, outline=True
-        )
+        # Button(
+        #     text="     A*  Search     ",
+        #     x=130,
+        #     y=HEIGHT - 80,
+        #     background_color=pygame.Color(*DARK),
+        #     foreground_color=pygame.Color(*BLUE),
+        #     padding=6, font_size=24, outline=True
+        # )
     ]
 
     algo_idx = 0
