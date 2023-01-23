@@ -8,6 +8,7 @@ from .constants import (
     CELL_SIZE,
     DARK,
     DARK_BLUE,
+    GRAY,
     GREEN,
     HEADER_HEIGHT,
     MAZE_HEIGHT,
@@ -15,7 +16,8 @@ from .constants import (
     WHITE,
     WIDTH,
     HEIGHT,
-    FPS
+    FPS,
+    YELLOW
 )
 
 # Initialize PyGame
@@ -28,6 +30,9 @@ pygame.display.set_caption("Pathfinder")
 
 # Set up clock
 CLOCK = pygame.time.Clock()
+
+# Font
+FONT = pygame.font.Font("fonts/Montserrat-Regular.ttf", 18)
 
 
 def main() -> None:
@@ -181,7 +186,7 @@ def main() -> None:
                 if cell_under_mouse != (row, col):
                     if maze.get_cell_value((row, col)) in (" ", "V", "*"):
                         maze.set_cell((row, col), "#")
-                    elif maze.get_cell_value((row, col)) not in  ("A", "B"):
+                    elif maze.get_cell_value((row, col)) not in ("A", "B"):
                         maze.set_cell((row, col), " ")
 
                     cell_under_mouse = (row, col)
@@ -202,7 +207,7 @@ def main() -> None:
                  algorithm_btn.rect.y + algorithm_btn.height,
                  algorithm_btn.width * 2,
                  algorithm_btn.height * len(algo_list) + 20),
-                 border_radius=10
+                border_radius=10
             )
 
             for btn in algo_list:
@@ -269,14 +274,39 @@ def draw(
 
     if algorithm_btn.draw(WINDOW):
         show_algorithms = True
-    
+
     if visualise_btn.draw(WINDOW) and algo_idx > -1:
         visualising = True
 
     if clear_btn.draw(WINDOW):
         maze.clear_walls()
         need_update = True
-    
+
+    texts = {
+        "Start Node": RED,
+        "Target Node": GREEN,
+        "Unvisited Node": WHITE,
+        "Visited Node": BLUE,
+        "Shortest-Path Node": YELLOW,
+        "Wall Node": DARK
+    }
+
+    x = 60
+    y = top.bottom + 20
+    for text in texts:
+        pygame.draw.rect(WINDOW, texts[text], (x, y, CELL_SIZE, CELL_SIZE))
+        
+        if texts[text] == WHITE or True:
+            pygame.draw.rect(
+                WINDOW, GRAY, (x, y, CELL_SIZE, CELL_SIZE), width=1)
+
+        text_surf = FONT.render(text, True, DARK)
+        text_rect = text_surf.get_rect()
+        text_rect.centery = y + CELL_SIZE // 2
+
+        WINDOW.blit(text_surf, (x + CELL_SIZE + 10, text_rect.y))
+        x += CELL_SIZE + 10 + text_surf.get_width() + 20
+
     label.draw(WINDOW)
 
     maze.draw()

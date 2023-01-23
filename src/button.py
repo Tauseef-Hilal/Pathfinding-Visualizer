@@ -30,7 +30,11 @@ class Button:
         self.background_color = background_color
 
         # Render text
-        font = pygame.font.Font("Montserrat-Regular.ttf", font_size)
+        if bold:
+            font = pygame.font.Font("fonts/Montserrat-Bold.ttf", font_size)
+        else:
+            font = pygame.font.Font("fonts/Montserrat-Regular.ttf", font_size)
+            
         self.text_surf = font.render(
             self.text, True, foreground_color
         )
