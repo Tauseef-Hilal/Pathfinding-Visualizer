@@ -157,20 +157,19 @@ def main() -> None:
                         break
 
                     row, col = maze.get_cell_pos(pos)
-                    if maze.get_cell_value((row, col)) != " ":
+                    if maze.get_cell_value((row, col)) not in (" ", "V", "*"):
                         break
 
                     maze.set_cell(dragged_cell, " ")
-                    maze.set_cell((row, col), dragged_cell_value)
 
                     if dragged_cell_value == "A":
-                        maze.update_ends(start=dragged_cell)
+                        maze.update_ends(start=(row, col))
                     else:
-                        maze.update_ends(goal=dragged_cell)
+                        maze.update_ends(goal=(row, col))
 
         if need_update:
             show_algorithms, need_update, visualising = draw(
-                maze, top, title, algorithm_btn, button,
+                maze, top, title, algorithm_btn, algo_idx, button,
                 visualising, clear_btn, show_algorithms, need_update
             )
 
@@ -180,7 +179,7 @@ def main() -> None:
                 row, col = maze.get_cell_pos(pos)
 
                 if cell_under_mouse != (row, col):
-                    if maze.get_cell_value((row, col)) == " ":
+                    if maze.get_cell_value((row, col)) in (" ", "V", "*"):
                         maze.set_cell((row, col), "#")
                     else:
                         maze.set_cell((row, col), " ")
@@ -218,9 +217,10 @@ def main() -> None:
                     label.rect.bottom = HEADER_HEIGHT - 10
         label.draw(WINDOW)
 
-        if visualising and (algo_idx > -1):
+        if visualising and algo_idx > -1:
+            maze.clear_visited()
             show_algorithms, need_update, visualising = draw(
-                maze, top, title, algorithm_btn, button,
+                maze, top, title, algorithm_btn, algo_idx, button,
                 visualising, clear_btn, show_algorithms, need_update
             )
             maze.solve(algo_list[algo_idx].text)
@@ -237,6 +237,7 @@ def draw(
     top: pygame.Rect,
     title: Button,
     algorithm_btn: Button,
+    algo_idx: int,
     visualise_btn: Button,
     visualising: bool,
     clear_btn: Button,
@@ -250,6 +251,7 @@ def draw(
         top (pygame.Rect): Rect object
         title (Button): Title
         algorithm_btn (Button): Algorithms switcher button
+        algo_idx (int): Index of selected algorithm
         visualise_btn (Button): Visualise button
         visualising (bool): Whether to visualise
         clear_btn (Button): Clear walls button
@@ -266,7 +268,7 @@ def draw(
     if algorithm_btn.draw(WINDOW):
         show_algorithms = True
     
-    if visualise_btn.draw(WINDOW):
+    if visualise_btn.draw(WINDOW) and algo_idx > -1:
         visualising = True
 
     if clear_btn.draw(WINDOW):

@@ -34,10 +34,10 @@ class Maze:
         self.maze = [[" " for _ in range(self.width)]
                      for _ in range(self.height)]
 
-        self.start = (0, 0)
-        self.maze[0][0] = "A"
-        self.goal = (self.width, self.height)
-        self.maze[self.height - 1][self.width - 1] = "B"
+        self.start = (10, self.height // 2)
+        self.maze[self.start[1]][self.start[0]] = "A"
+        self.goal = (self.width - 11, self.height // 2)
+        self.maze[self.goal[1]][self.goal[0]] = "B"
 
         # Generate screen coordinates for maze
         self.coords = self._generate_coordinates()
@@ -86,7 +86,6 @@ class Maze:
             pos (tuple[int, int]): Position of the cell
             value (str): String value for the cell
         """
-
         self.maze[pos[0]][pos[1]] = value
 
     def update_ends(
@@ -101,9 +100,11 @@ class Maze:
             end (Optional[tuple[int, int]], optional): Maze end. Defaults to None.
         """
         if start:
+            self.maze[start[0]][start[1]] = "A"
             self.start = start
 
         if goal:
+            self.maze[goal[0]][goal[1]] = "B"
             self.goal = goal
 
     def clear_walls(self) -> None:
@@ -113,6 +114,14 @@ class Maze:
                      for _ in range(self.height)]
         self.maze[self.start[0]][self.start[1]] = "A"
         self.maze[self.goal[0]][self.goal[1]] = "B"
+
+    def clear_visited(self) -> None:
+        """Clear visited nodes
+        """
+        for i in range(self.height):
+            for j in range(self.width):
+                if self.get_cell_value((i, j)) in ("V", "*"):
+                    self.set_cell((i, j), " ")
 
     def mouse_within_bounds(self, pos: tuple[int, int]) -> bool:
         """Check if mouse cursor is inside the maze
@@ -161,11 +170,14 @@ class Maze:
                     case "B":
                         color = GREEN
                         self.goal = (i, j)
+                    case "*":
+                        color = YELLOW
+                    case "V":
+                        color = BLUE
                     case _:
                         color = WHITE
 
                 # Cell coordinates
-                # x, y = self.coords[i][j]
                 self._draw_rect((i, j), color)
 
     def solve(self, algo_name: str) -> None:
@@ -244,5 +256,9 @@ class Maze:
 
         # Wait for 50ms
         if delay:
+            self.maze[row][col] = "V"
             pygame.time.delay(20)
             pygame.display.update()
+
+        if color == YELLOW:
+            self.maze[row][col] = "*"
