@@ -208,7 +208,7 @@ class Maze:
 
             # Color the solution path in blue
             for cell in solution.path[1:-1]:
-                self._draw_rect(coords=cell, color=YELLOW)
+                self._draw_rect(coords=cell, color=YELLOW, delay=True)
             pygame.display.update()
             return
 
@@ -256,9 +256,6 @@ class Maze:
 
         # Wait for 50ms
         if delay:
-            self.maze[row][col] = "V"
+            self.maze[row][col] = "V" if color == BLUE else "*"
             pygame.time.delay(20)
             pygame.display.update()
-
-        if color == YELLOW:
-            self.maze[row][col] = "*"
