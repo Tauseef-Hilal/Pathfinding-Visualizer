@@ -1,18 +1,26 @@
 # Colors
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
-DARK = (40, 40, 40)
-GREEN = (0, 194, 25)
-BLUE = (97, 175, 238)
+DARK = (11, 53, 71)
+GREEN = (26, 188, 157)
+BLUE = (100, 206, 228)
 REDLIKE = (212, 97, 85)
 WHITE = (238, 240, 252)
-YELLOW = (220, 235, 113)
+YELLOW = (255, 254, 106)
+GRAY = (175, 216, 248)
+DARK_BLUE = (52, 73, 94)
+
+# Window Dimensions
+WIDTH, HEIGHT = 1230, 900
+HEADER_HEIGHT = 200
 
 # Maze
 CELL_SIZE = 30
+MAZE_WIDTH = WIDTH - CELL_SIZE
+MAZE_HEIGHT = HEIGHT - HEADER_HEIGHT
 
 # Framerate
 FPS = 60
 
-# Window Dimensions
-WIDTH, HEIGHT = 900, 700
+
+# ...

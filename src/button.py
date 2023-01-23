@@ -16,7 +16,7 @@ class Button:
             x: float | str,
             y: float | str,
             padding: int = 5,
-            font_size: int = 20,
+            font_size: int = 18,
             bold: bool = False,
             outline: bool = False,
             foreground_color: pygame.Color = pygame.Color(0, 0, 0),
@@ -39,11 +39,14 @@ class Button:
         self.text_rect = self.text_surf.get_rect()
 
         # Translate params: x and y if they are strings
+        self.width = self.text_rect.width + padding * 2
+        self.height = self.text_rect.height + padding * 2
+
         if x == "center":
-            x = (WIDTH - self.text_surf.get_width()) / 2
+            x = (WIDTH - self.width) / 2
 
         if y == "center":
-            y = (HEIGHT - self.text_surf.get_height()) / 2
+            y = (HEIGHT - self.height) / 2
 
         # Create the actual button
         self.rect = pygame.Rect(
