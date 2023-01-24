@@ -1,3 +1,5 @@
+import random
+import time
 from typing import Optional
 import pygame
 
@@ -79,13 +81,16 @@ class Maze:
 
         return self.maze[pos[0]][pos[1]]
 
-    def set_cell(self, pos: tuple[int, int], value: str) -> None:
+    def set_cell(self, pos: tuple[int, int], value: str, forced: bool = False) -> None:
         """Update a cell value in the maze
 
         Args:
             pos (tuple[int, int]): Position of the cell
             value (str): String value for the cell
         """
+        if pos in (self.start, self.goal) and not forced:
+            return
+
         self.maze[pos[0]][pos[1]] = value
 
     def update_ends(
@@ -180,6 +185,76 @@ class Maze:
                 # Cell coordinates
                 self._draw_rect((i, j), color)
 
+    def generate_maze(self) -> None:
+        """Generate a new maze using recursive division algorithm
+        """
+        for i in range(self.width):
+            self.maze[0][i] = "#"
+            self._draw_rect((0, i), DARK, delay=True)
+            self.maze[-1][i] = "#"
+            self._draw_rect((-1, i), DARK, delay=True)
+
+        for i in range(self.height):
+            self.maze[i][0] = "#"
+            self._draw_rect((i, 0), DARK, delay=True)
+            self.maze[i][-1] = "#"
+            self._draw_rect((i, -1), DARK, delay=True)
+
+        self._generate_by_recursive_division(
+            1, self.width - 2, 1, self.height - 2)
+
+    def _generate_by_recursive_division(self, x1, x2, y1, y2) -> None:
+        """Use recursive division to generate a new maze
+        """
+        width = (x2 - x1) + 1
+        height = (y2 - y1) + 1
+
+        if width <= 4 and height <= 4:
+            return
+
+        if width > height:
+            x = self.draw_line(x1, x2, y1, y2)
+            self._generate_by_recursive_division(x1, x - 1, y1, y2)
+            self._generate_by_recursive_division(x + 1, x2, y1, y2)
+        elif height > width:
+            y = self.draw_line(x1, x2, y1, y2, horizontal=True)
+            self._generate_by_recursive_division(x1, x2, y1, y - 1)
+            self._generate_by_recursive_division(x1, x2, y + 1, y2)
+        else:
+            is_horizontal = random.choice((True, False))
+            a = self.draw_line(x1, x2, y1, y2,
+                               horizontal=is_horizontal)
+            if is_horizontal:
+                self._generate_by_recursive_division(x1, x2, y1, a - 1)
+                self._generate_by_recursive_division(x1, x2, a + 1, y2)
+            else:
+                self._generate_by_recursive_division(x1, a - 1, y1, y2)
+                self._generate_by_recursive_division(a + 1, x2, y1, y2)
+
+    def draw_line(self, x1, x2, y1, y2, horizontal=False):
+        if horizontal:
+            y = random.randint(y1 + 2, y2 - 2)
+            while self.maze[y][x1 - 1] == " " or self.maze[y][x2 + 1] == " ":
+                y = random.randint(y1, y2)
+
+            for i in range(x1, x2 + 1):
+                self._draw_rect((y, i), DARK, delay=True)
+
+            i = random.randint(*sorted((x1, x2)))
+            self.set_cell((y, i), " ")
+            return y
+
+        x = random.randint(x1 + 2, x2 - 2)
+        while self.maze[y1 - 1][x] == " " or self.maze[y2 + 1][x] == " ":
+            x = random.randint(x1, x2)
+
+        for i in range(y1, y2 + 1):
+            self._draw_rect((i, x), DARK, delay=True)
+
+        i = random.randint(*sorted((y1, y2)))
+        self.set_cell((i, x), " ")
+        return x
+
     def solve(self, algo_name: str) -> None:
         """Solve the maze with an algorithm
 
@@ -238,6 +313,8 @@ class Maze:
         # Determine maze coordinates
         row, col = coords
         x, y = self.coords[row][col]
+        if coords in (self.start, self.goal) and color == DARK:
+            return
 
         # Draw
         pygame.draw.rect(
@@ -254,8 +331,13 @@ class Maze:
                 width=1
             )
 
-        # Wait for 50ms
+        # Wait for 20ms
         if delay:
-            self.maze[row][col] = "V" if color == BLUE else "*"
-            pygame.time.delay(20)
+            if color != DARK:
+                self.set_cell((row, col), "V" if color == BLUE else "*")
+                pygame.time.delay(20)
+            else:
+                self.set_cell((row, col), "#")
+                pygame.time.delay(10)
+
             pygame.display.update()

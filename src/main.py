@@ -100,6 +100,17 @@ def main() -> None:
     )
     button.rect.centery = top.centery
 
+    #
+    generate = Button(
+        "Generate Maze", 0, 0,
+        background_color=pygame.Color(*DARK_BLUE),
+        foreground_color=pygame.Color(*WHITE),
+        padding=6, font_size=20, outline=False
+    )
+    generate.rect.centery = top.centery
+    generate.rect.left = button.rect.right + 120
+
+
     # Button instance for Clear button
     clear_btn = Button(
         "Clear Walls", 0, 0,
@@ -123,6 +134,7 @@ def main() -> None:
     need_update = True
     show_algorithms = False
     visualising = False
+    generating = False
 
     dragging = False
     dragged_cell = (0, 0)
@@ -162,10 +174,7 @@ def main() -> None:
                         break
 
                     row, col = maze.get_cell_pos(pos)
-                    if maze.get_cell_value((row, col)) not in (" ", "V", "*"):
-                        break
-
-                    maze.set_cell(dragged_cell, " ")
+                    maze.set_cell(dragged_cell, " ", forced=True)
 
                     if dragged_cell_value == "A":
                         maze.update_ends(start=(row, col))
@@ -173,9 +182,9 @@ def main() -> None:
                         maze.update_ends(goal=(row, col))
 
         if need_update:
-            show_algorithms, need_update, visualising = draw(
+            show_algorithms, need_update, visualising, generating = draw(
                 maze, top, title, algorithm_btn, algo_idx, button,
-                visualising, clear_btn, label, show_algorithms, need_update
+                visualising, generate, generating, clear_btn, label, show_algorithms, need_update
             )
 
         if mouse_is_down and not dragging:
@@ -224,13 +233,17 @@ def main() -> None:
 
         if visualising and algo_idx > -1:
             maze.clear_visited()
-            show_algorithms, need_update, visualising = draw(
+            show_algorithms, need_update, visualising, generating = draw(
                 maze, top, title, algorithm_btn, algo_idx, button,
-                visualising, clear_btn, label, show_algorithms, need_update
+                visualising, generate, generating, clear_btn, label, show_algorithms, need_update
             )
             maze.solve(algo_list[algo_idx].text)
             need_update = False
             visualising = False
+
+        if generating:
+            maze.generate_maze()
+            generating = False
 
         # Update
         pygame.display.update()
@@ -245,11 +258,13 @@ def draw(
     algo_idx: int,
     visualise_btn: Button,
     visualising: bool,
+    generate_btn: Button,
+    generating: bool,
     clear_btn: Button,
     label: Button,
     show_algorithms: bool,
     need_update: bool
-) -> tuple[bool, bool, bool]:
+) -> tuple[bool, bool, bool, bool]:
     """Draw things (except Visualise button)
 
     Args:
@@ -260,13 +275,14 @@ def draw(
         algo_idx (int): Index of selected algorithm
         visualise_btn (Button): Visualise button
         visualising (bool): Whether to visualise
+        generate_btn (Button): Generate maze button
         clear_btn (Button): Clear walls button
         label (Button): Label
         show_algorithms (bool): Whether to show algorithms list
         need_update (bool): Whether to redraw content
 
     Returns:
-        tuple[bool, bool]: show_algorithms, need_update
+        tuple[bool, bool]: show_algorithms, need_update, visualising, generating
     """
     WINDOW.fill(WHITE)
     pygame.draw.rect(WINDOW, DARK_BLUE, top)
@@ -281,6 +297,11 @@ def draw(
     if clear_btn.draw(WINDOW):
         maze.clear_walls()
         need_update = True
+    
+    if generate_btn.draw(WINDOW):
+        maze.clear_walls()
+        need_update = True
+        generating = True
 
     texts = {
         "Start Node": RED,
@@ -295,7 +316,7 @@ def draw(
     y = top.bottom + 20
     for text in texts:
         pygame.draw.rect(WINDOW, texts[text], (x, y, CELL_SIZE, CELL_SIZE))
-        
+
         if texts[text] == WHITE or True:
             pygame.draw.rect(
                 WINDOW, GRAY, (x, y, CELL_SIZE, CELL_SIZE), width=1)
@@ -310,4 +331,4 @@ def draw(
     label.draw(WINDOW)
 
     maze.draw()
-    return show_algorithms, need_update, visualising
+    return show_algorithms, need_update, visualising, generating
