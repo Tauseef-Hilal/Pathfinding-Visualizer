@@ -22,71 +22,61 @@ class AStarSearch:
         Returns:
             Solution: Solution found
         """
-        return NoSolution([], set())
+        # Create Node for the source cell
+        node = Node(state=grid.start, parent=None, action=None)
 
-        # # Create Node for the source cell
-        # node = Node(state=grid.start, parent=None, action=None)
+        # Instantiate PriorityQueue frontier and add node into it
+        frontier = PriorityQueueFrontier()
+        frontier.add(node)
 
-        # # Instantiate PriorityQueue frontier and add node into it
-        # frontier = PriorityQueueFrontier()
-        # frontier.add(node)
+        # Keep track of G scores
+        distance = {grid.start: 0}
 
-        # # Keep track of explored positions
-        # explored_states = set()
-        # distance = {grid.start: 0}
+        while True:
+            # Return empty Solution object for no solution
+            if frontier.is_empty():
+                return NoSolution([], set(distance))
 
-        # while True:
-        #     # Return empty Solution object for no solution
-        #     if frontier.is_empty():
-        #         return NoSolution([], explored_states)
+            # Remove node from the frontier
+            node = frontier.pop()
 
-        #     # Remove node from the frontier
-        #     node = frontier.pop()
+            # If reached destination point
+            if node.state == grid.end:
 
-        #     if node.state in explored_states:
-        #         continue
+                # Generate path and return a Solution object
+                cells = []
 
-        #     # If reached destination point
-        #     if node.state == grid.end:
+                temp = node
+                while temp.parent != None:
+                    cells.append(temp.state)
+                    temp = temp.parent
 
-        #         # Generate path and return a Solution object
-        #         cells = []
+                cells.append(grid.start)
+                cells.reverse()
 
-        #         temp = node
-        #         while temp.parent != None:
-        #             cells.append(temp.state)
-        #             temp = temp.parent
+                return Solution(cells, set(distance))
 
-        #         cells.append(grid.start)
-        #         cells.reverse()
+            # Call the visualiser function, if provided
+            if node.parent and callback:
+                callback(node.state, delay=True)
 
-        #         return Solution(cells, explored_states)
+            # Determine possible actions
+            for action, state in grid.get_neighbours(node.state).items():
+                cost = distance[node.state] + 1
 
-        #     # Call the visualiser function, if provided
-        #     if node.parent and callback:
-        #         callback(node.state, delay=True)
+                if state not in distance or cost < distance[state]:
+                    distance[state] = cost
 
-        #     # Add current node position into the explored set
-        #     explored_states.add(node.state)
+                    n = frontier.get(state)
+                    n.parent = node
 
-        #     # Determine possible actions
-        #     for action, state in grid.get_neighbours(node.state).items():
-        #         new = Node(
-        #             state=state,
-        #             parent=None,
-        #             action=action,
-        #         )
+                    if not n.action:
+                        n.action = action
 
-        #         frontier.add(
-        #             new,
-        #             priority=distance[node.state] + 1
-        #             + AStarSearch.heuristic(state, grid.end)
-        #         )
-
-        #         if (state not in distance
-        #                 or distance[node.state] + 1 < distance[state]):
-        #             distance[state] = distance[node.state] + 1
-        #             new.parent = node
+                    frontier.add(
+                        node=n,
+                        priority=cost + AStarSearch.heuristic(state, grid.end)
+                    )
 
     @staticmethod
     def heuristic(state: tuple[int, int], goal: tuple[int, int]) -> int:
@@ -99,7 +89,7 @@ class AStarSearch:
         Returns:
             int: Distance
         """
-        row, col = state
-        goal_row, goal_col = goal
+        x1, y1 = state
+        x2, y2 = goal
 
-        return max(abs(goal_row - row), abs(goal_col - col))
+        return abs(x1 - x2) + abs(y1 - y2)

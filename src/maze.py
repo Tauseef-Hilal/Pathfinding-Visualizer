@@ -304,7 +304,7 @@ class Maze:
         mapper: dict[str, Search] = {
             "Breadth First Search": Search.BREADTH_FIRST_SEARCH,
             "Depth First Search": Search.DEPTH_FIRST_SEARCH,
-            "A*  Search": Search.ASTAR_SEARCH,
+            "A* Search": Search.ASTAR_SEARCH,
         }
 
         # Instantiate Grid for PathFinder
