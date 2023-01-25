@@ -189,71 +189,110 @@ class Maze:
         """Generate a new maze using recursive division algorithm
         """
         for i in range(self.width):
-            self.maze[0][i] = "#"
+            self.set_cell((0, i), "#")
+            self.set_cell((-1, i), "#")
             self._draw_rect((0, i), DARK, delay=True)
-            self.maze[-1][i] = "#"
             self._draw_rect((-1, i), DARK, delay=True)
 
         for i in range(self.height):
-            self.maze[i][0] = "#"
+            self.set_cell((i, 0), "#")
+            self.set_cell((i, -1), "#")
             self._draw_rect((i, 0), DARK, delay=True)
-            self.maze[i][-1] = "#"
             self._draw_rect((i, -1), DARK, delay=True)
 
         self._generate_by_recursive_division(
             1, self.width - 2, 1, self.height - 2)
 
-    def _generate_by_recursive_division(self, x1, x2, y1, y2) -> None:
-        """Use recursive division to generate a new maze
-        """
-        width = (x2 - x1) + 1
-        height = (y2 - y1) + 1
+    def _generate_by_recursive_division(
+        self,
+        x1: int,
+        x2: int,
+        y1: int,
+        y2: int
+    ) -> None:
+        """Generate maze by recursive division algorithm
 
-        if width <= 4 and height <= 4:
+        Args:
+            x1 (int): Grid row start
+            x2 (int): Grid row end
+            y1 (int): Grid column start
+            y2 (int): Grid column end
+        """
+        width = x2 - x1
+        height = y2 - y1
+
+        # Base case:
+        if width < 1 or height < 1:
             return
 
-        if width > height:
-            x = self.draw_line(x1, x2, y1, y2)
-            self._generate_by_recursive_division(x1, x - 1, y1, y2)
-            self._generate_by_recursive_division(x + 1, x2, y1, y2)
-        elif height > width:
-            y = self.draw_line(x1, x2, y1, y2, horizontal=True)
-            self._generate_by_recursive_division(x1, x2, y1, y - 1)
-            self._generate_by_recursive_division(x1, x2, y + 1, y2)
-        else:
-            is_horizontal = random.choice((True, False))
-            a = self.draw_line(x1, x2, y1, y2,
-                               horizontal=is_horizontal)
-            if is_horizontal:
-                self._generate_by_recursive_division(x1, x2, y1, a - 1)
-                self._generate_by_recursive_division(x1, x2, a + 1, y2)
-            else:
-                self._generate_by_recursive_division(x1, a - 1, y1, y2)
-                self._generate_by_recursive_division(a + 1, x2, y1, y2)
+        # Whether to draw horizontally or vertically
+        horizontal = True if height > width else (
+            False if width != height else random.choice((True, False)))
 
-    def draw_line(self, x1, x2, y1, y2, horizontal=False):
+        # Arguments for reursive calls
+        args_list: list[tuple[int, int, int, int]] = []
+
+        # Divide the maze and add new grids' properties to args_list
         if horizontal:
-            y = random.randint(y1 + 2, y2 - 2)
-            while self.maze[y][x1 - 1] == " " or self.maze[y][x2 + 1] == " ":
-                y = random.randint(y1, y2)
+            y = self.draw_line(x1, x2, y1, y2, horizontal=True)
+            args_list.extend([(x1, x2, y1, y - 1), (x1, x2, y + 1, y2)])
+        else:
+            x = self.draw_line(x1, x2, y1, y2)
+            args_list.extend([(x1, x - 1, y1, y2), (x + 1, x2, y1, y2)])
 
-            for i in range(x1, x2 + 1):
-                self._draw_rect((y, i), DARK, delay=True)
+        # Divide the two grids
+        for args in args_list:
+            self._generate_by_recursive_division(*args)
 
-            i = random.randint(*sorted((x1, x2)))
-            self.set_cell((y, i), " ")
-            return y
+    def draw_line(
+        self,
+        x1: int,
+        x2: int,
+        y1: int,
+        y2: int,
+        horizontal: bool = False
+    ) -> int:
+        """Draw walls horizontally or vertically
 
-        x = random.randint(x1 + 2, x2 - 2)
-        while self.maze[y1 - 1][x] == " " or self.maze[y2 + 1][x] == " ":
-            x = random.randint(x1, x2)
+        Args:
+            x1 (int): Grid row start
+            x2 (int): Grid row end
+            y1 (int): Grid column start
+            y2 (int): Grid column end
+            horizontal (bool, optional): Horizontal or vertical. Defaults to False.
 
+        Returns:
+            int: X or Y coordinate of wall line
+        """
+
+        # Handle horizontal division
+        if horizontal:
+            x1, y1 = y1, x1
+            x2, y2 = y2, x2
+
+        # Walls at even places
+        if x1 % 2 != 0:
+            x1 += 1
+        wall = random.randrange(x1, x2, 2)
+
+        # Holes at odd places
+        if y1 % 2 == 0:
+            y1 += 1
+        hole = random.randrange(y1, y2, 2)
+
+        # Coordinates
+        hole_coords = (hole, wall) if not horizontal else (wall, hole)
+        wall_coords = [-1, wall] if not horizontal else [wall, -1]
+
+        # Draw walls
         for i in range(y1, y2 + 1):
-            self._draw_rect((i, x), DARK, delay=True)
+            wall_coords[horizontal] = i
+            if hole_coords == tuple(wall_coords):
+                continue
 
-        i = random.randint(*sorted((y1, y2)))
-        self.set_cell((i, x), " ")
-        return x
+            self._draw_rect(tuple(wall_coords), DARK, delay=True)
+
+        return wall
 
     def solve(self, algo_name: str) -> None:
         """Solve the maze with an algorithm
