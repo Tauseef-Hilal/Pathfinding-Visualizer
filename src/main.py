@@ -64,7 +64,7 @@ def main() -> None:
 
     algo_list = [
         Button(
-            text="Breadth First Search",
+            text="A* Search",
             x=algorithm_btn.rect.x - 40,
             y=algorithm_btn.rect.y + algorithm_btn.height,
             background_color=pygame.Color(*DARK_BLUE),
@@ -72,7 +72,7 @@ def main() -> None:
             padding=6, font_size=20, outline=False
         ),
         Button(
-            text="Depth First Search",
+            text="Dijkstra's Search",
             x=algorithm_btn.rect.x - 40,
             y=algorithm_btn.rect.y + algorithm_btn.height * 2,
             background_color=pygame.Color(*DARK_BLUE),
@@ -80,9 +80,17 @@ def main() -> None:
             padding=6, font_size=20, outline=False
         ),
         Button(
-            text="A* Search",
+            text="Breadth First Search",
             x=algorithm_btn.rect.x - 40,
             y=algorithm_btn.rect.y + algorithm_btn.height * 3,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            padding=6, font_size=20, outline=False
+        ),
+        Button(
+            text="Depth First Search",
+            x=algorithm_btn.rect.x - 40,
+            y=algorithm_btn.rect.y + algorithm_btn.height * 4,
             background_color=pygame.Color(*DARK_BLUE),
             foreground_color=pygame.Color(*WHITE),
             padding=6, font_size=20, outline=False
