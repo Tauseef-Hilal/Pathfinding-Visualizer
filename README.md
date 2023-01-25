@@ -6,13 +6,14 @@ Pathfinding visualizations with Python and Pygame.
 <table border='0px'>
     <tr>
         <td>
-            <img src='screenshots/one.png?raw=true' alt='One'
+            <img src='screenshots/maze.png?raw=true' alt='Maze'
                 width='480'>
         </td>
     </tr>
     <tr>
         <td>
-            <img src='screenshots/two.png?raw=true' alt='Two' width='480'>
+            <img src='screenshots/bfs.png?raw=true' alt='BFS' 
+                width='480'>
         </td>
     </tr>
 </table>
