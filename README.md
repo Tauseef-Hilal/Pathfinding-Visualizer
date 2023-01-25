@@ -9,7 +9,7 @@ https://user-images.githubusercontent.com/67793598/214547422-2dac7762-aff8-4404-
 <table border='0px'>
     <tr>
         <td>
-            <img src='screenshots/maze.png?raw=true' alt='Maze' 
+            <img src='screenshots/generated-maze.png?raw=true' alt='Maze' 
                 width='480'>
         </td>
     </tr>
@@ -21,7 +21,7 @@ https://user-images.githubusercontent.com/67793598/214547422-2dac7762-aff8-4404-
     </tr>
     <tr>
         <td>
-            <img src='screenshots/bfs.png?raw=true' alt='BFS' 
+            <img src='screenshots/breadth-first.png?raw=true' alt='BFS' 
                 width='480'>
         </td>
     </tr>
