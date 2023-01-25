@@ -62,7 +62,7 @@ class AStarSearch:
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():
-                cost = distance[node.state] + 1
+                cost = distance[node.state] + grid.get_cost(state)
 
                 if state not in distance or cost < distance[state]:
                     distance[state] = cost

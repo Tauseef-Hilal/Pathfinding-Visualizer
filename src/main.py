@@ -1,7 +1,7 @@
 import sys
 import pygame
 
-from .maze import Maze
+from .maze import Maze, weight
 from .button import Button
 from .constants import (
     BLUE,
@@ -11,7 +11,7 @@ from .constants import (
     GRAY,
     GREEN,
     HEADER_HEIGHT,
-    MAZE_HEIGHT,
+    WHITE_2,
     RED,
     WHITE,
     WIDTH,
@@ -32,7 +32,7 @@ pygame.display.set_caption("Pathfinder")
 CLOCK = pygame.time.Clock()
 
 # Font
-FONT = pygame.font.Font("fonts/Montserrat-Regular.ttf", 18)
+FONT = pygame.font.Font("assets/fonts/Montserrat-Regular.ttf", 18)
 
 
 def main() -> None:
@@ -118,7 +118,6 @@ def main() -> None:
     generate.rect.centery = top.centery
     generate.rect.left = button.rect.right + 120
 
-
     # Button instance for Clear button
     clear_btn = Button(
         "Clear Walls", 0, 0,
@@ -143,6 +142,7 @@ def main() -> None:
     show_algorithms = False
     visualising = False
     generating = False
+    draw_weighted_nodes = False
 
     dragging = False
     dragged_cell = (0, 0)
@@ -172,6 +172,7 @@ def main() -> None:
 
             if event.type == pygame.MOUSEBUTTONUP:
                 mouse_is_down = False
+                draw_weighted_nodes = False
                 cell_under_mouse = (-1, -1)
 
                 if dragging:
@@ -195,6 +196,8 @@ def main() -> None:
                 visualising, generate, generating, clear_btn, label, show_algorithms, need_update
             )
 
+        draw_weighted_nodes = pygame.key.get_pressed()[pygame.K_w]
+
         if mouse_is_down and not dragging:
             pos = pygame.mouse.get_pos()
             if maze.mouse_within_bounds(pos):
@@ -202,7 +205,9 @@ def main() -> None:
 
                 if cell_under_mouse != (row, col):
                     if maze.get_cell_value((row, col)) in (" ", "V", "*"):
-                        maze.set_cell((row, col), "#")
+                        maze.set_cell(
+                            (row, col), "#" if not draw_weighted_nodes else "W"
+                        )
                     elif maze.get_cell_value((row, col)) not in ("A", "B"):
                         maze.set_cell((row, col), " ")
 
@@ -305,7 +310,7 @@ def draw(
     if clear_btn.draw(WINDOW):
         maze.clear_walls()
         need_update = True
-    
+
     if generate_btn.draw(WINDOW):
         maze.clear_walls()
         need_update = True
@@ -313,28 +318,36 @@ def draw(
 
     texts = {
         "Start Node": RED,
-        "Target Node": GREEN,
         "Unvisited Node": WHITE,
         "Visited Node": BLUE,
         "Shortest-Path Node": YELLOW,
-        "Wall Node": DARK
+        "Wall Node": DARK,
+        "Weighted Node": WHITE_2,
+        "Target Node": GREEN,
     }
 
     x = 60
     y = top.bottom + 20
     for text in texts:
         pygame.draw.rect(WINDOW, texts[text], (x, y, CELL_SIZE, CELL_SIZE))
-
-        if texts[text] == WHITE or True:
-            pygame.draw.rect(
-                WINDOW, GRAY, (x, y, CELL_SIZE, CELL_SIZE), width=1)
-
+        pygame.draw.rect(
+            WINDOW, GRAY, (x, y, CELL_SIZE, CELL_SIZE), width=1)
+        
         text_surf = FONT.render(text, True, DARK)
         text_rect = text_surf.get_rect()
         text_rect.centery = y + CELL_SIZE // 2
 
         WINDOW.blit(text_surf, (x + CELL_SIZE + 10, text_rect.y))
-        x += CELL_SIZE + 10 + text_surf.get_width() + 20
+        
+        if texts[text] == WHITE_2:
+            WINDOW.blit(weight, (x + 3, y + 3))
+            x = 60
+
+        elif texts[text] == DARK:
+            y += text_surf.get_height() + 20
+        else:
+            x += CELL_SIZE + 10 + text_surf.get_width() + 60
+
 
     label.draw(WINDOW)
 

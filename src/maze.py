@@ -1,5 +1,4 @@
 import random
-import time
 from typing import Optional
 import pygame
 
@@ -9,22 +8,23 @@ from .pathfinder.models.grid import Grid
 from .pathfinder.models.search_types import Search
 
 from .constants import (
+    BLACK,
     CELL_SIZE,
     GRAY,
     MAZE_HEIGHT,
     HEADER_HEIGHT,
     MAZE_WIDTH,
+    WHITE_2,
     WIDTH,
     BLUE,
     DARK,
-    REDLIKE,
     WHITE,
     GREEN,
-    BLACK,
     RED,
     YELLOW
 )
 
+weight = pygame.image.load("assets/images/weight.png")
 
 class Maze:
     def __init__(self, surface: pygame.surface.Surface) -> None:
@@ -179,6 +179,8 @@ class Maze:
                         color = YELLOW
                     case "V":
                         color = BLUE
+                    case "W":
+                        color = WHITE_2
                     case _:
                         color = WHITE
 
@@ -363,13 +365,16 @@ class Maze:
             rect=pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
         )
 
-        if color == BLUE or color == WHITE:
+        if color in (BLUE, WHITE, WHITE_2):
             pygame.draw.rect(
                 surface=self.surface,
                 color=GRAY,
                 rect=pygame.Rect(x, y, CELL_SIZE, CELL_SIZE),
                 width=1
             )
+        
+        if color == WHITE_2:
+            self.surface.blit(weight, (x + 3, y + 3))
 
         # Wait for 20ms
         if delay:

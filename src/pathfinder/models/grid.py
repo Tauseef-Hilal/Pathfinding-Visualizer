@@ -12,10 +12,24 @@ class Grid:
         # Calculate grid dimensions
         self.width = max(len(row) for row in grid)
         self.height = len(grid)
-    
+
+    def get_cost(self, pos: tuple[int, int]) -> int:
+        """Get weight of a node
+
+        Args:
+            pos (tuple[int, int]): Cell position
+
+        Returns:
+            int: Weight
+        """
+        if self.grid[pos[0]][pos[1]] == "W":
+            return 15
+
+        return 1
+
     def get_neighbours(
-            self,
-            pos: tuple[int, int]
+        self,
+        pos: tuple[int, int]
     ) -> dict[str, tuple[int, int]]:
         """Determine the neighbours of a cell
 
