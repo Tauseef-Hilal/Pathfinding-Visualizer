@@ -2,6 +2,8 @@ import random
 from typing import Optional
 import pygame
 
+from src.pathfinder.models.node import Node
+
 from .button import Button
 from .pathfinder.main import PathFinder
 from .pathfinder.models.grid import Grid
@@ -36,13 +38,16 @@ class Maze:
         self.width = MAZE_WIDTH // CELL_SIZE
         self.height = MAZE_HEIGHT // CELL_SIZE
 
-        self.maze = [["1" for _ in range(self.width)]
-                     for _ in range(self.height)]
+        self.maze = [[Node("1", (j, i), 1) for i in range(self.width)]
+                     for j in range(self.height)]
 
-        self.start = (10, self.height // 2)
-        self.maze[self.start[1]][self.start[0]] = "A"
-        self.goal = (self.width - 11, self.height // 2)
-        self.maze[self.goal[1]][self.goal[0]] = "B"
+        self.start = (self.height // 2, 10)
+        self.maze[self.start[0]][self.start[1]].value = "A"
+        self.maze[self.start[0]][self.start[1]].cost = 0
+
+        self.goal = (self.height // 2, self.width - 11)
+        self.maze[self.goal[0]][self.goal[1]].value = "B"
+        self.maze[self.goal[0]][self.goal[1]].cost = 1
 
         # Generate screen coordinates for maze
         self.coords = self._generate_coordinates()
@@ -82,7 +87,7 @@ class Maze:
             str: Cell value
         """
 
-        return self.maze[pos[0]][pos[1]]
+        return self.maze[pos[0]][pos[1]].value
 
     def set_cell(self, pos: tuple[int, int], value: str, forced: bool = False) -> None:
         """Update a cell value in the maze
@@ -94,7 +99,22 @@ class Maze:
         if pos in (self.start, self.goal) and not forced:
             return
 
-        self.maze[pos[0]][pos[1]] = value
+        match value:
+            case "A":
+                cost = 0
+            case "B":
+                cost = 1
+            case "#":
+                cost = -1
+            case "V":
+                cost = self.maze[pos[0]][pos[1]].cost
+            case "*":
+                cost = self.maze[pos[0]][pos[1]].cost
+            case _:
+                cost = int(value)
+
+        self.maze[pos[0]][pos[1]].value = value
+        self.maze[pos[0]][pos[1]].cost = cost
 
     def update_ends(
         self,
@@ -108,28 +128,28 @@ class Maze:
             end (Optional[tuple[int, int]], optional): Maze end. Defaults to None.
         """
         if start:
-            self.maze[start[0]][start[1]] = "A"
             self.start = start
 
         if goal:
-            self.maze[goal[0]][goal[1]] = "B"
             self.goal = goal
 
     def clear_board(self) -> None:
         """Clear maze walls
         """
-        self.maze = [["1" for _ in range(self.width)]
-                     for _ in range(self.height)]
-        self.maze[self.start[0]][self.start[1]] = "A"
-        self.maze[self.goal[0]][self.goal[1]] = "B"
+        self.maze = [[Node("1", (j, i), 1) for i in range(self.width)]
+                     for j in range(self.height)]
+
+        self.set_cell(self.start, "A", forced=True)
+        self.set_cell(self.goal, "B", forced=True)
 
     def clear_visited(self) -> None:
         """Clear visited nodes
         """
         for i in range(self.height):
             for j in range(self.width):
-                if self.get_cell_value((i, j)) in ("V", "*"):
-                    self.set_cell((i, j), "1")
+                node = self.maze[i][j]
+                if node.value in ("V", "*"):
+                    self.set_cell((i, j), str(node.cost))
 
     def mouse_within_bounds(self, pos: tuple[int, int]) -> bool:
         """Check if mouse cursor is inside the maze
@@ -166,31 +186,29 @@ class Maze:
 
         # Draw every cell on the screen
         for i, row in enumerate(self.maze):
-            for j, col in enumerate(row):
+            for j, node in enumerate(row):
 
                 # Determine cell color
-                match col:
+                match node.value:
                     case "#":
                         color = DARK
                     case "A":
                         color = RED
-                        self.start = (i, j)
+                        # self.start = (i, j)
                     case "B":
                         color = GREEN
-                        self.goal = (i, j)
+                        # self.goal = (i, j)
                     case "*":
                         color = YELLOW
                     case "V":
                         color = BLUE
-                    case "1":
-                        color = WHITE
                     case _:
-                        color = WHITE_2
+                        color = WHITE
 
                 # Cell coordinates
                 self._draw_rect((i, j), color)
 
-    def generate_maze(self) -> None:
+    def generate_maze(self, weighted: bool = False) -> None:
         """Generate a new maze using recursive division algorithm
         """
         for i in range(self.width):
@@ -207,6 +225,17 @@ class Maze:
 
         self._generate_by_recursive_division(
             1, self.width - 2, 1, self.height - 2)
+
+        if not weighted:
+            return
+
+        path = self.solve("A* Search", visualize=False)
+        for rowIdx, row in enumerate(self.maze):
+            for colIdx in range(0, len(row), 2):
+                if (rowIdx, colIdx) in path or row[colIdx].value == "#":
+                    continue
+
+                self.set_cell((rowIdx, colIdx), str(random.randint(1, 9)))
 
     def _generate_by_recursive_division(
         self,
@@ -299,7 +328,11 @@ class Maze:
 
         return wall
 
-    def solve(self, algo_name: str) -> None:
+    def solve(
+        self,
+        algo_name: str,
+        visualize: bool = True
+    ) -> list[tuple[int, int]]:
         """Solve the maze with an algorithm
 
         Args:
@@ -320,8 +353,11 @@ class Maze:
         solution = PathFinder.find_path(
             grid=grid,
             search=mapper[algo_name.strip()],
-            callback=self._draw_rect
+            callback=self._draw_rect if visualize else None
         )
+
+        if not visualize:
+            return solution.path
 
         # If found a solution
         if solution.path:
@@ -330,7 +366,7 @@ class Maze:
             for cell in solution.path[1:-1]:
                 self._draw_rect(coords=cell, color=YELLOW, delay=True)
             pygame.display.update()
-            return
+            return solution.path
 
         # Otherwise
         msg = Button(
@@ -340,6 +376,8 @@ class Maze:
 
         msg.draw(surf=self.surface)
         pygame.display.update()
+
+        return [self.start, self.goal]
 
     def _draw_rect(
             self,
@@ -360,7 +398,7 @@ class Maze:
         x, y = self.coords[row][col]
         if coords in (self.start, self.goal) and color == DARK:
             return
-
+        
         # Draw
         pygame.draw.rect(
             surface=self.surface,
@@ -376,18 +414,20 @@ class Maze:
                 width=1
             )
 
-        if color == WHITE_2:
+        if (n := self.maze[row][col]).cost > 1:
             rect = self.surface.blit(weight, (x + 3, y + 3))
-            text = font.render(self.get_cell_value((row, col)), True, WHITE_2)
+            text = font.render(str(n.cost), True, WHITE_2)
             self.surface.blit(text, (rect.centerx - 4, rect.centery - 8))
-
+        
         # Wait for 20ms
-        if delay:
-            if color != DARK:
-                self.set_cell((row, col), "V" if color == BLUE else "*")
-                pygame.time.delay(20)
-            else:
-                self.set_cell((row, col), "#")
-                pygame.time.delay(10)
+        if not delay:
+            return
 
-            pygame.display.update()
+        if color != DARK:
+            self.set_cell((row, col), "V" if color == BLUE else "*")
+            pygame.time.delay(20)
+        else:
+            self.set_cell((row, col), "#")
+            pygame.time.delay(10)
+
+        pygame.display.update()

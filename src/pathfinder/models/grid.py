@@ -4,35 +4,17 @@ from src.pathfinder.models.node import Node
 class Grid:
     def __init__(
         self,
-        grid: list[list[str]],
+        grid: list[list[Node]],
         start: tuple[int, int],
         end: tuple[int, int]
     ) -> None:
-        self.grid: list[list[Node]] = []
-        for i, row in enumerate(grid):
-            temp = []
-            for j, value in enumerate(row):
-                match value:
-                    case "A":
-                        cost = 0
-                    case "B":
-                        cost = 1
-                    case "#":
-                        cost = -1
-                    case _:
-                        cost = int(value)
-                
-                temp.append(Node(value=value, state=(i, j), cost=cost))
-            
-            self.grid.append(temp)
-        
+        self.grid: list[list[Node]] = grid
         self.start = start
         self.end = end
 
         # Calculate grid dimensions
         self.width = max(len(row) for row in grid)
         self.height = len(grid)
-    
 
     def get_node(self, pos: tuple[int, int]) -> Node:
         """Get node by position
@@ -44,7 +26,7 @@ class Grid:
             int: Weight
         """
         return self.grid[pos[0]][pos[1]]
-    
+
     def get_cost(self, pos: tuple[int, int]) -> int:
         """Get weight of a node
 
