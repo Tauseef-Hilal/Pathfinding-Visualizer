@@ -3,6 +3,7 @@ from typing import Optional
 import pygame
 
 from src.pathfinder.models.node import Node
+from src.pathfinder.models.solution import Solution
 
 from .button import Button
 from .pathfinder.main import PathFinder
@@ -95,6 +96,7 @@ class Maze:
         Args:
             pos (tuple[int, int]): Position of the cell
             value (str): String value for the cell
+            forced (bool): Force set
         """
         if pos in (self.start, self.goal) and not forced:
             return
@@ -102,8 +104,12 @@ class Maze:
         match value:
             case "A":
                 cost = 0
+                self.start = pos
+                self.maze[pos[0]][pos[1]].parent = None
             case "B":
                 cost = 1
+                self.goal = pos
+                self.maze[pos[0]][pos[1]].parent = None
             case "#":
                 cost = -1
             case "V":
@@ -115,23 +121,6 @@ class Maze:
 
         self.maze[pos[0]][pos[1]].value = value
         self.maze[pos[0]][pos[1]].cost = cost
-
-    def update_ends(
-        self,
-        start: Optional[tuple[int, int]] = None,
-        goal: Optional[tuple[int, int]] = None
-    ) -> None:
-        """Update maze ends (start and goal)
-
-        Args:
-            start (Optional[tuple[int, int]], optional): Maze start. Defaults to None.
-            end (Optional[tuple[int, int]], optional): Maze end. Defaults to None.
-        """
-        if start:
-            self.start = start
-
-        if goal:
-            self.goal = goal
 
     def clear_board(self) -> None:
         """Clear maze walls
@@ -229,7 +218,7 @@ class Maze:
         if not weighted:
             return
 
-        path = self.solve("A* Search", visualize=False)
+        path = self.solve("A* Search", visualize=False).path
         for rowIdx, row in enumerate(self.maze):
             for colIdx in range(0, len(row), 2):
                 if (rowIdx, colIdx) in path or row[colIdx].value == "#":
@@ -331,8 +320,8 @@ class Maze:
     def solve(
         self,
         algo_name: str,
-        visualize: bool = True
-    ) -> list[tuple[int, int]]:
+        visualize: bool = True,
+    ) -> Solution:
         """Solve the maze with an algorithm
 
         Args:
@@ -353,11 +342,11 @@ class Maze:
         solution = PathFinder.find_path(
             grid=grid,
             search=mapper[algo_name.strip()],
-            callback=self._draw_rect if visualize else None
+            callback=self._draw_rect if visualize else None,
         )
 
         if not visualize:
-            return solution.path
+            return solution
 
         # If found a solution
         if solution.path:
@@ -366,7 +355,7 @@ class Maze:
             for cell in solution.path[1:-1]:
                 self._draw_rect(coords=cell, color=YELLOW, delay=True)
             pygame.display.update()
-            return solution.path
+            return solution
 
         # Otherwise
         msg = Button(
@@ -377,13 +366,13 @@ class Maze:
         msg.draw(surf=self.surface)
         pygame.display.update()
 
-        return [self.start, self.goal]
+        return solution
 
     def _draw_rect(
             self,
             coords: tuple[int, int],
             color: tuple[int, int, int] = BLUE,
-            delay: bool = False
+            delay: bool = False,
     ) -> None:
         """Color an existing cell in the maze
 
