@@ -170,7 +170,6 @@ def main() -> None:
     dragged_cell = (0, 0)
     dragged_cell_value = "A"
     cell_under_mouse = (-1, -1)
-    ticks = pygame.time.get_ticks()
 
     while True:
         for event in pygame.event.get():

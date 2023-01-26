@@ -39,8 +39,9 @@ class Maze:
         self.width = MAZE_WIDTH // CELL_SIZE
         self.height = MAZE_HEIGHT // CELL_SIZE
 
-        self.maze = [[Node("1", (j, i), 1) for i in range(self.width)]
-                     for j in range(self.height)]
+        self.maze = [[Node("1", (rowIdx, colIdx), 1)
+                      for colIdx in range(self.width)]
+                     for rowIdx in range(self.height)]
 
         self.start = (self.height // 2, 10)
         self.maze[self.start[0]][self.start[1]].value = "A"
@@ -125,8 +126,9 @@ class Maze:
     def clear_board(self) -> None:
         """Clear maze walls
         """
-        self.maze = [[Node("1", (j, i), 1) for i in range(self.width)]
-                     for j in range(self.height)]
+        self.maze = [[Node("1", (rowIdx, colIdx), 1)
+                      for colIdx in range(self.width)]
+                     for rowIdx in range(self.height)]
 
         self.set_cell(self.start, "A", forced=True)
         self.set_cell(self.goal, "B", forced=True)
@@ -387,7 +389,7 @@ class Maze:
         x, y = self.coords[row][col]
         if coords in (self.start, self.goal) and color == DARK:
             return
-        
+
         # Draw
         pygame.draw.rect(
             surface=self.surface,
@@ -405,9 +407,9 @@ class Maze:
 
         if (n := self.maze[row][col]).cost > 1:
             rect = self.surface.blit(weight, (x + 3, y + 3))
-            text = font.render(str(n.cost), True, WHITE_2)
+            text = font.render(str(n.cost), True, GRAY)
             self.surface.blit(text, (rect.centerx - 4, rect.centery - 8))
-        
+
         # Wait for 20ms
         if not delay:
             return
