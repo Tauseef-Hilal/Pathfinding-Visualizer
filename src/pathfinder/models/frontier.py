@@ -88,7 +88,7 @@ class PriorityQueueFrontier(Frontier):
         """
         heappush(self.frontier, (priority, node))
     
-    def get(self, state: tuple[int, int]) -> Node:
+    def get(self, state: tuple[int, int]) -> Node | None:
         """Get node by state. Create new if not found
 
         Args:
@@ -101,7 +101,7 @@ class PriorityQueueFrontier(Frontier):
             if node.state == state:
                 return node
             
-        return Node(state, None, None)
+        return None
 
     def pop(self) -> Node:
         """Remove a node from the frontier

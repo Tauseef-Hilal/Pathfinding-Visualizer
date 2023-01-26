@@ -183,7 +183,7 @@ def main() -> None:
                         break
 
                     row, col = maze.get_cell_pos(pos)
-                    maze.set_cell(dragged_cell, " ", forced=True)
+                    maze.set_cell(dragged_cell, "1", forced=True)
 
                     if dragged_cell_value == "A":
                         maze.update_ends(start=(row, col))
@@ -196,7 +196,7 @@ def main() -> None:
                 visualising, generate, generating, clear_btn, label, show_algorithms, need_update
             )
 
-        draw_weighted_nodes = pygame.key.get_pressed()[pygame.K_w]
+        draw_weighted_nodes, key = get_pressed()
 
         if mouse_is_down and not dragging:
             pos = pygame.mouse.get_pos()
@@ -204,12 +204,13 @@ def main() -> None:
                 row, col = maze.get_cell_pos(pos)
 
                 if cell_under_mouse != (row, col):
-                    if maze.get_cell_value((row, col)) in (" ", "V", "*"):
-                        maze.set_cell(
-                            (row, col), "#" if not draw_weighted_nodes else "W"
-                        )
+                    if maze.get_cell_value((row, col)) in ("1", "V", "*"):
+                        if draw_weighted_nodes and key:
+                            maze.set_cell((row, col), str(key % 50 + 2))
+                        else:
+                            maze.set_cell((row, col), "#")
                     elif maze.get_cell_value((row, col)) not in ("A", "B"):
-                        maze.set_cell((row, col), " ")
+                        maze.set_cell((row, col), "1")
 
                     cell_under_mouse = (row, col)
 
@@ -263,6 +264,18 @@ def main() -> None:
         CLOCK.tick(FPS)
 
 
+def get_pressed() -> tuple[bool, int | None]:
+    keys = [pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5,
+            pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9]
+
+    pressed = pygame.key.get_pressed()
+    for key in keys:
+        if pressed[key]:
+            return True, key
+
+    return False, None
+
+
 def draw(
     maze: Maze,
     top: pygame.Rect,
@@ -308,11 +321,11 @@ def draw(
         visualising = True
 
     if clear_btn.draw(WINDOW):
-        maze.clear_walls()
+        maze.clear_board()
         need_update = True
 
     if generate_btn.draw(WINDOW):
-        maze.clear_walls()
+        maze.clear_board()
         need_update = True
         generating = True
 
@@ -332,13 +345,13 @@ def draw(
         pygame.draw.rect(WINDOW, texts[text], (x, y, CELL_SIZE, CELL_SIZE))
         pygame.draw.rect(
             WINDOW, GRAY, (x, y, CELL_SIZE, CELL_SIZE), width=1)
-        
+
         text_surf = FONT.render(text, True, DARK)
         text_rect = text_surf.get_rect()
         text_rect.centery = y + CELL_SIZE // 2
 
         WINDOW.blit(text_surf, (x + CELL_SIZE + 10, text_rect.y))
-        
+
         if texts[text] == WHITE_2:
             WINDOW.blit(weight, (x + 3, y + 3))
             x = 60
@@ -347,7 +360,6 @@ def draw(
             y += text_surf.get_height() + 20
         else:
             x += CELL_SIZE + 10 + text_surf.get_width() + 60
-
 
     label.draw(WINDOW)
 

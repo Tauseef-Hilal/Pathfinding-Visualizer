@@ -23,7 +23,7 @@ class AStarSearch:
             Solution: Solution found
         """
         # Create Node for the source cell
-        node = Node(state=grid.start, parent=None, action=None)
+        node = grid.get_node(pos=grid.start)
 
         # Instantiate PriorityQueue frontier and add node into it
         frontier = PriorityQueueFrontier()
@@ -67,7 +67,7 @@ class AStarSearch:
                 if state not in distance or cost < distance[state]:
                     distance[state] = cost
 
-                    n = frontier.get(state)
+                    n = grid.get_node(pos=state)
                     n.parent = node
 
                     if not n.action:

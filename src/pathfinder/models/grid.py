@@ -1,3 +1,6 @@
+from src.pathfinder.models.node import Node
+
+
 class Grid:
     def __init__(
         self,
@@ -5,14 +8,43 @@ class Grid:
         start: tuple[int, int],
         end: tuple[int, int]
     ) -> None:
-        self.grid = grid
+        self.grid: list[list[Node]] = []
+        for i, row in enumerate(grid):
+            temp = []
+            for j, value in enumerate(row):
+                match value:
+                    case "A":
+                        cost = 0
+                    case "B":
+                        cost = 1
+                    case "#":
+                        cost = -1
+                    case _:
+                        cost = int(value)
+                
+                temp.append(Node(value=value, state=(i, j), cost=cost))
+            
+            self.grid.append(temp)
+        
         self.start = start
         self.end = end
 
         # Calculate grid dimensions
         self.width = max(len(row) for row in grid)
         self.height = len(grid)
+    
 
+    def get_node(self, pos: tuple[int, int]) -> Node:
+        """Get node by position
+
+        Args:
+            pos (tuple[int, int]): Cell position
+
+        Returns:
+            int: Weight
+        """
+        return self.grid[pos[0]][pos[1]]
+    
     def get_cost(self, pos: tuple[int, int]) -> int:
         """Get weight of a node
 
@@ -22,10 +54,7 @@ class Grid:
         Returns:
             int: Weight
         """
-        if self.grid[pos[0]][pos[1]] == "W":
-            return 15
-
-        return 1
+        return self.grid[pos[0]][pos[1]].cost
 
     def get_neighbours(
         self,
@@ -61,7 +90,7 @@ class Grid:
             if not (0 <= r < self.height and 0 <= c < self.width):
                 continue
 
-            if self.grid[r][c] == "#":
+            if self.grid[r][c].value == "#":
                 continue
 
             possible_actions[action] = (r, c)

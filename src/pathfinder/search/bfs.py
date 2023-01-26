@@ -22,7 +22,7 @@ class BreadthFirstSearch:
         """
 
         # Create Node for the source cell
-        node = Node(state=grid.start, parent=None, action=None)
+        node = grid.get_node(pos=grid.start)
 
         # Instantiate Frontier and add node into it
         frontier = QueueFrontier()
@@ -51,6 +51,7 @@ class BreadthFirstSearch:
 
                 temp = node
                 while temp.parent != None:
+                    # print(temp.state)
                     cells.append(temp.state)
                     temp = temp.parent
 
@@ -64,13 +65,11 @@ class BreadthFirstSearch:
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():
-                new = Node(
-                    state=state,
-                    parent=node,
-                    action=action
-                )
-
                 if state in explored_states or frontier.contains_state(state):
                     continue
+
+                new = grid.get_node(pos=state)
+                new.parent = node
+                new.action = action
 
                 frontier.add(node=new)

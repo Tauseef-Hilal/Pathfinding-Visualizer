@@ -4,11 +4,15 @@ from __future__ import annotations
 class Node:
     def __init__(
         self,
+        value: str,
         state: tuple[int, int],
-        parent: Node | None,
-        action: str | None
+        cost: int,
+        parent: Node | None = None,
+        action: str | None = None
     ) -> None:
+        self.value = value
         self.state = state
+        self.cost = cost
         self.parent = parent
         self.action = action
     

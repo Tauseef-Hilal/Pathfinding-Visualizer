@@ -8,7 +8,6 @@ from .pathfinder.models.grid import Grid
 from .pathfinder.models.search_types import Search
 
 from .constants import (
-    BLACK,
     CELL_SIZE,
     GRAY,
     MAZE_HEIGHT,
@@ -24,7 +23,11 @@ from .constants import (
     YELLOW
 )
 
+pygame.font.init()
+
 weight = pygame.image.load("assets/images/weight.png")
+font = pygame.font.Font("assets/fonts/Montserrat-Regular.ttf", 14)
+
 
 class Maze:
     def __init__(self, surface: pygame.surface.Surface) -> None:
@@ -33,7 +36,7 @@ class Maze:
         self.width = MAZE_WIDTH // CELL_SIZE
         self.height = MAZE_HEIGHT // CELL_SIZE
 
-        self.maze = [[" " for _ in range(self.width)]
+        self.maze = [["1" for _ in range(self.width)]
                      for _ in range(self.height)]
 
         self.start = (10, self.height // 2)
@@ -112,10 +115,10 @@ class Maze:
             self.maze[goal[0]][goal[1]] = "B"
             self.goal = goal
 
-    def clear_walls(self) -> None:
+    def clear_board(self) -> None:
         """Clear maze walls
         """
-        self.maze = [[" " for _ in range(self.width)]
+        self.maze = [["1" for _ in range(self.width)]
                      for _ in range(self.height)]
         self.maze[self.start[0]][self.start[1]] = "A"
         self.maze[self.goal[0]][self.goal[1]] = "B"
@@ -126,7 +129,7 @@ class Maze:
         for i in range(self.height):
             for j in range(self.width):
                 if self.get_cell_value((i, j)) in ("V", "*"):
-                    self.set_cell((i, j), " ")
+                    self.set_cell((i, j), "1")
 
     def mouse_within_bounds(self, pos: tuple[int, int]) -> bool:
         """Check if mouse cursor is inside the maze
@@ -179,10 +182,10 @@ class Maze:
                         color = YELLOW
                     case "V":
                         color = BLUE
-                    case "W":
-                        color = WHITE_2
-                    case _:
+                    case "1":
                         color = WHITE
+                    case _:
+                        color = WHITE_2
 
                 # Cell coordinates
                 self._draw_rect((i, j), color)
@@ -372,9 +375,11 @@ class Maze:
                 rect=pygame.Rect(x, y, CELL_SIZE, CELL_SIZE),
                 width=1
             )
-        
+
         if color == WHITE_2:
-            self.surface.blit(weight, (x + 3, y + 3))
+            rect = self.surface.blit(weight, (x + 3, y + 3))
+            text = font.render(self.get_cell_value((row, col)), True, WHITE_2)
+            self.surface.blit(text, (rect.centerx - 4, rect.centery - 8))
 
         # Wait for 20ms
         if delay:
