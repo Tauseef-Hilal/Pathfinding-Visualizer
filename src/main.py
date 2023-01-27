@@ -167,9 +167,8 @@ def main() -> None:
     draw_weighted_nodes = False
 
     dragging = False
-    dragged_cell = (0, 0)
-    dragged_cell_value = "A"
     cell_under_mouse = (-1, -1)
+    cell_value = ""
 
     while True:
         for event in pygame.event.get():
@@ -189,13 +188,12 @@ def main() -> None:
                 row, col = maze.get_cell_pos(pos)
                 if (value := maze.get_cell_value((row, col))) in ("A", "B"):
                     dragging = True
-                    dragged_cell = row, col
-                    dragged_cell_value = value
+                    cell_under_mouse = (row, col)
+                    cell_value = value
 
             if event.type == pygame.MOUSEBUTTONUP:
                 mouse_is_down = False
                 draw_weighted_nodes = False
-                cell_under_mouse = (-1, -1)
 
                 if dragging:
                     dragging = False
@@ -205,31 +203,13 @@ def main() -> None:
                         break
 
                     row, col = maze.get_cell_pos(pos)
-                    if maze.get_cell_value((row, col)) in ("A", "B"):
+                    if maze.get_cell_value((row, col)) in ("A", "B") or done_visualising:
                         break
 
-                    maze.set_cell((row, col), dragged_cell_value)
-                    maze.set_cell(dragged_cell, "1")
+                    maze.set_cell((row, col), cell_value)
+                    maze.set_cell(cell_under_mouse, "1")
 
-                    if done_visualising:
-                        maze.clear_visited()
-
-                        solution = maze.solve(
-                            algo_list[algo_idx].text, visualize=False)
-                        path = solution.path
-                        explored = solution.explored
-
-                        for i, j in explored:
-                            if (i, j) in (maze.start, maze.goal):
-                                continue
-
-                            maze.set_cell((i, j), "V")
-
-                        for i, j in path:
-                            if (i, j) in (maze.start, maze.goal):
-                                continue
-
-                            maze.set_cell((i, j), "*")
+                cell_under_mouse = (-1, -1)
 
         if need_update:
             show_algorithms, need_update, visualising, show_generating_options, done_visualising = draw(
@@ -259,19 +239,25 @@ def main() -> None:
             x, y = pygame.mouse.get_pos()
             pygame.draw.rect(
                 WINDOW,
-                RED if dragged_cell_value == "A" else GREEN,
+                RED if cell_value == "A" else GREEN,
                 (x - 10, y - 10, 20, 20)
             )
 
         if dragging and done_visualising:
             x, y = pygame.mouse.get_pos()
-            row, col = maze.get_cell_pos((x, y))
-            x, y = maze.coords[row][col]
-            pygame.draw.rect(
-                WINDOW,
-                RED if dragged_cell_value == "A" else GREEN,
-                (x, y, CELL_SIZE, CELL_SIZE)
-            )
+            
+            if maze.mouse_within_bounds((x, y)):
+                row, col = maze.get_cell_pos((x, y))
+                x, y = maze.coords[row][col]
+
+                if cell_under_mouse != (row, col):
+                    print(x, y)
+                    maze.set_cell((row, col), cell_value)
+                    maze.set_cell(cell_under_mouse, "1")
+
+                    draw_path(maze, algo_list, algo_idx)
+
+                    cell_under_mouse = (row, col)
 
         if visualising and algo_idx > -1:
             maze.clear_visited()
@@ -311,6 +297,9 @@ def main() -> None:
                     )
                     label.rect.bottom = HEADER_HEIGHT - 10
 
+                    if done_visualising:
+                        draw_path(maze, algo_list, algo_idx)
+
         if show_generating_options:
             pygame.draw.rect(
                 WINDOW,
@@ -332,6 +321,27 @@ def main() -> None:
         # Update
         pygame.display.update()
         CLOCK.tick(FPS)
+
+
+def draw_path(maze, algo_list, algo_idx):
+    maze.clear_visited()
+
+    solution = maze.solve(
+        algo_list[algo_idx].text, visualize=False)
+    path = solution.path
+    explored = solution.explored
+
+    for i, j in explored:
+        if (i, j) in (maze.start, maze.goal):
+            continue
+
+        maze.set_cell((i, j), "V")
+
+    for i, j in path:
+        if (i, j) in (maze.start, maze.goal):
+            continue
+
+        maze.set_cell((i, j), "*")
 
 
 def get_pressed() -> tuple[bool, int | None]:
