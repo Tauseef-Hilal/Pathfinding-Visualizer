@@ -4,7 +4,6 @@ from typing import Optional
 
 from ..types import Visualiser
 from ..models.frontier import PriorityQueueFrontier
-from ..models.node import Node, Node
 from ..models.grid import Grid
 from ..models.solution import NoSolution, Solution
 
@@ -27,15 +26,19 @@ class AStarSearch:
 
         # Instantiate PriorityQueue frontier and add node into it
         frontier = PriorityQueueFrontier()
-        frontier.add(node)
+        frontier.add(
+            node,
+            priority=AStarSearch.heuristic(grid.start, grid.end)
+        )
 
         # Keep track of G scores
-        distance = {grid.start: 0}
+        g_score = {grid.start: 0}
+        f_score = {grid.start: AStarSearch.heuristic(grid.start, grid.end)}
 
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
-                return NoSolution([], set(distance))
+                return NoSolution([], set(g_score))
 
             # Remove node from the frontier
             node = frontier.pop()
@@ -54,7 +57,7 @@ class AStarSearch:
                 cells.append(grid.start)
                 cells.reverse()
 
-                return Solution(cells, set(distance))
+                return Solution(cells, set(g_score))
 
             # Call the visualiser function, if provided
             if node.parent and callback:
@@ -62,10 +65,12 @@ class AStarSearch:
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():
-                cost = distance[node.state] + grid.get_cost(state)
+                cost = g_score[node.state] + grid.get_cost(state)
 
-                if state not in distance or cost < distance[state]:
-                    distance[state] = cost
+                if state not in g_score or cost < g_score[state]:
+                    g_score[state] = cost
+                    f_score[state] = cost + \
+                        AStarSearch.heuristic(state, grid.end)
 
                     n = grid.get_node(pos=state)
                     n.parent = node
@@ -75,7 +80,7 @@ class AStarSearch:
 
                     frontier.add(
                         node=n,
-                        priority=cost + AStarSearch.heuristic(state, grid.end)
+                        priority=f_score[state]
                     )
 
     @staticmethod

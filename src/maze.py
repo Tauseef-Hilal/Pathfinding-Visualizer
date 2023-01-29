@@ -1,11 +1,10 @@
 import random
-from typing import Optional
 import pygame
 
-from src.pathfinder.models.node import Node
-from src.pathfinder.models.solution import Solution
-
 from .button import Button
+from .animations import AnimatingNode, Animator
+from .pathfinder.models.node import Node
+from .pathfinder.models.solution import Solution
 from .pathfinder.main import PathFinder
 from .pathfinder.models.grid import Grid
 from .pathfinder.models.search_types import Search
@@ -16,7 +15,6 @@ from .constants import (
     MAZE_HEIGHT,
     HEADER_HEIGHT,
     MAZE_WIDTH,
-    WHITE_2,
     WIDTH,
     BLUE,
     DARK,
@@ -28,13 +26,14 @@ from .constants import (
 
 pygame.font.init()
 
-weight = pygame.image.load("assets/images/weight.png")
-font = pygame.font.Font("assets/fonts/Montserrat-Regular.ttf", 14)
+WEIGHT = pygame.image.load("assets/images/weight.png")
+FONT = pygame.font.Font("assets/fonts/Montserrat-Regular.ttf", 14)
 
 
 class Maze:
     def __init__(self, surface: pygame.surface.Surface) -> None:
         self.surface = surface
+        self.animator: Animator
 
         self.width = MAZE_WIDTH // CELL_SIZE
         self.height = MAZE_HEIGHT // CELL_SIZE
@@ -185,10 +184,8 @@ class Maze:
                         color = DARK
                     case "A":
                         color = RED
-                        # self.start = (i, j)
                     case "B":
                         color = GREEN
-                        # self.goal = (i, j)
                     case "*":
                         color = YELLOW
                     case "V":
@@ -197,22 +194,84 @@ class Maze:
                         color = WHITE
 
                 # Cell coordinates
-                self._draw_rect((i, j), color)
+                x, y = self.coords[i][j]
+                for node in self.animator.nodes_to_animate:
+                    if node.center == (x + 15, y + 15) and node.progress > 0:
+                        self._draw_rect(
+                            coords=(i, j),
+                            color=node.color,
+                            node=node
+                        )
+                        break
+                else:
+                    self._draw_rect((i, j), color)
 
     def generate_maze(self, weighted: bool = False) -> None:
         """Generate a new maze using recursive division algorithm
         """
+        nodes_to_animate = []
         for i in range(self.width):
-            self.set_cell((0, i), "#")
-            self.set_cell((-1, i), "#")
-            self._draw_rect((0, i), DARK, delay=True)
-            self._draw_rect((-1, i), DARK, delay=True)
+            rect = pygame.Rect(0, 0, 9, 9)
+            x, y = self.coords[0][i]
+            rect.center = (x + 15, y + 15)
+            nodes_to_animate.append(
+                AnimatingNode(
+                    center=(x + 15, y + 15),
+                    rect=rect,
+                    ticks=pygame.time.get_ticks(),
+                    value="#",
+                    color=DARK
+                )
+            )
 
+        self.animator.add_nodes_to_animate(nodes_to_animate, delay=True)
+
+        nodes_to_animate = []
+        for i in range(self.width):
+            rect = pygame.Rect(0, 0, 9, 9)
+            x, y = self.coords[-1][i]
+            rect.center = (x + 15, y + 15)
+            nodes_to_animate.append(
+                AnimatingNode(
+                    center=(x + 15, y + 15),
+                    rect=rect,
+                    ticks=pygame.time.get_ticks(),
+                    value="#",
+                    color=DARK
+                )
+            )
+
+        self.animator.add_nodes_to_animate(nodes_to_animate, delay=True)
+
+        nodes_to_animate = []
         for i in range(self.height):
-            self.set_cell((i, 0), "#")
-            self.set_cell((i, -1), "#")
-            self._draw_rect((i, 0), DARK, delay=True)
-            self._draw_rect((i, -1), DARK, delay=True)
+            rect = pygame.Rect(0, 0, 9, 9)
+            x, y = self.coords[i][0]
+            rect.center = (x + 15, y + 15)
+            nodes_to_animate.append(
+                AnimatingNode(
+                    center=(x + 15, y + 15),
+                    rect=rect,
+                    ticks=pygame.time.get_ticks(),
+                    value="#",
+                    color=DARK
+                )
+            )
+
+            rect = pygame.Rect(0, 0, 9, 9)
+            x, y = self.coords[i][-1]
+            rect.center = (x + 15, y + 15)
+            nodes_to_animate.append(
+                AnimatingNode(
+                    center=(x + 15, y + 15),
+                    rect=rect,
+                    ticks=pygame.time.get_ticks(),
+                    value="#",
+                    color=DARK
+                )
+            )
+
+        self.animator.add_nodes_to_animate(nodes_to_animate, delay=True)
 
         self._generate_by_recursive_division(
             1, self.width - 2, 1, self.height - 2)
@@ -221,12 +280,36 @@ class Maze:
             return
 
         path = self.solve("A* Search", visualize=False).path
+        nodes_to_animate = []
         for rowIdx, row in enumerate(self.maze):
             for colIdx in range(0, len(row), 2):
-                if (rowIdx, colIdx) in path or row[colIdx].value == "#":
+                if (rowIdx, colIdx) in path:
                     continue
 
-                self.set_cell((rowIdx, colIdx), str(random.randint(1, 9)))
+                rect = pygame.Rect(0, 0, 9, 9)
+                x, y = self.coords[rowIdx][colIdx]
+
+                exists = False
+                for node in self.animator.nodes_to_animate:
+                    if node.center == (x + 15, y + 15):
+                        exists = True
+                        break
+
+                if exists:
+                    continue
+
+                nodes_to_animate.append(
+                    AnimatingNode(
+                        rect=rect,
+                        center=(x + 15, y + 15),
+                        ticks=pygame.time.get_ticks(),
+                        value=str(random.randint(1, 9)),
+                        color=WHITE,
+                        duration=50
+                    )
+                )
+
+        self.animator.add_nodes_to_animate(nodes_to_animate, delay=True)
 
     def _generate_by_recursive_division(
         self,
@@ -310,13 +393,28 @@ class Maze:
         wall_coords = [-1, wall] if not horizontal else [wall, -1]
 
         # Draw walls
+        nodes_to_animate = []
         for i in range(y1, y2 + 1):
             wall_coords[horizontal] = i
             if hole_coords == tuple(wall_coords):
                 continue
 
-            self._draw_rect(tuple(wall_coords), DARK, delay=True)
+            # Create a rectangle
+            rect = pygame.Rect(0, 0, 9, 9)
 
+            # Set the starting position of the rectangle
+            x, y = self.coords[wall_coords[0]][wall_coords[1]]
+            rect.center = (x + 15, y + 15)
+            nodes_to_animate.append(
+                AnimatingNode(
+                    center=(x + 15, y + 15),
+                    rect=rect,
+                    ticks=pygame.time.get_ticks(),
+                    value="#",
+                    color=DARK
+                )
+            )
+        self.animator.add_nodes_to_animate(nodes_to_animate, delay=True)
         return wall
 
     def solve(
@@ -375,6 +473,7 @@ class Maze:
             coords: tuple[int, int],
             color: tuple[int, int, int] = BLUE,
             delay: bool = False,
+            node: AnimatingNode | None = None
     ) -> None:
         """Color an existing cell in the maze
 
@@ -387,6 +486,7 @@ class Maze:
         # Determine maze coordinates
         row, col = coords
         x, y = self.coords[row][col]
+
         if coords in (self.start, self.goal) and color == DARK:
             return
 
@@ -394,10 +494,11 @@ class Maze:
         pygame.draw.rect(
             surface=self.surface,
             color=color,
-            rect=pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
+            rect=node.rect if node else pygame.Rect(
+                x, y, CELL_SIZE, CELL_SIZE)
         )
 
-        if color in (BLUE, WHITE, WHITE_2):
+        if color in (BLUE, WHITE) and not node:
             pygame.draw.rect(
                 surface=self.surface,
                 color=GRAY,
@@ -406,9 +507,15 @@ class Maze:
             )
 
         if (n := self.maze[row][col]).cost > 1:
-            rect = self.surface.blit(weight, (x + 3, y + 3))
-            text = font.render(str(n.cost), True, GRAY)
-            self.surface.blit(text, (rect.centerx - 4, rect.centery - 8))
+            image_rect = WEIGHT.get_rect(center=(x + 15, y + 15))
+            self.surface.blit(WEIGHT, image_rect)
+
+            text = FONT.render(
+                str(n.cost if not node else node.value), True, GRAY
+            )
+            text_rect = text.get_rect()
+            text_rect.center = image_rect.center
+            self.surface.blit(text, text_rect)
 
         # Wait for 20ms
         if not delay:

@@ -1,7 +1,10 @@
+import math
 import sys
 import pygame
 
-from .maze import Maze, weight
+from src.animations import Animator
+
+from .maze import Maze, WEIGHT, AnimatingNode
 from .button import Button
 from .constants import (
     BLUE,
@@ -25,8 +28,8 @@ pygame.init()
 pygame.font.init()
 
 # Set up window
-WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Pathfinder")
+WINDOW = pygame.display.set_mode((WIDTH, HEIGHT), pygame.HWACCEL)
+pygame.display.set_caption("Pathfinding Visualiser")
 
 # Set up clock
 CLOCK = pygame.time.Clock()
@@ -50,6 +53,8 @@ def main() -> None:
 
     # Instantiate Maze
     maze = Maze(surface=WINDOW)
+    animator = Animator(surface=WINDOW, maze=maze)
+    maze.animator = animator
 
     # Algorithms list
     algorithm_btn = Button(
@@ -193,6 +198,7 @@ def main() -> None:
 
             if event.type == pygame.MOUSEBUTTONUP:
                 mouse_is_down = False
+                animator.animating = False
                 draw_weighted_nodes = False
 
                 if dragging:
@@ -226,14 +232,47 @@ def main() -> None:
 
                 if cell_under_mouse != (row, col):
                     if maze.get_cell_value((row, col)) in ("1", "V", "*"):
+                        rect = pygame.Rect(0, 0, 9, 9)
+                        x, y = maze.coords[row][col]
+                        rect.center = (x + 15, y + 15)
+
                         if draw_weighted_nodes and key:
-                            maze.set_cell((row, col), str(key % 50 + 2))
+                            pygame.draw.rect(WINDOW, DARK, rect)
+                            animator.add_nodes_to_animate([
+                                AnimatingNode(
+                                    center=(x + 15, y + 15),
+                                    rect=rect,
+                                    ticks=pygame.time.get_ticks(),
+                                    value=str(key % 50 + 2),
+                                    color=WHITE,
+                                    duration=50
+                                )
+                            ])
                         else:
-                            maze.set_cell((row, col), "#")
+                            pygame.draw.rect(WINDOW, DARK, rect)
+                            animator.add_nodes_to_animate([
+                                AnimatingNode(
+                                    center=(x + 15, y + 15),
+                                    rect=rect,
+                                    ticks=pygame.time.get_ticks(),
+                                    value="#",
+                                    color=DARK
+                                )
+                            ])
+
                     elif maze.get_cell_value((row, col)) not in ("A", "B"):
                         maze.set_cell((row, col), "1")
 
                     cell_under_mouse = (row, col)
+
+        # ANIMATE
+        if animator.nodes_to_animate:
+            animator.animating = True
+            show_generating_options = False
+            visualising = False
+            animator.animate_walls()
+        else:
+            animator.animating = False
 
         if dragging and not done_visualising:
             x, y = pygame.mouse.get_pos()
@@ -245,13 +284,12 @@ def main() -> None:
 
         if dragging and done_visualising:
             x, y = pygame.mouse.get_pos()
-            
+
             if maze.mouse_within_bounds((x, y)):
                 row, col = maze.get_cell_pos((x, y))
                 x, y = maze.coords[row][col]
 
                 if cell_under_mouse != (row, col):
-                    print(x, y)
                     maze.set_cell((row, col), cell_value)
                     maze.set_cell(cell_under_mouse, "1")
 
@@ -370,7 +408,7 @@ def draw(
     clear_btn: Button,
     label: Button,
     show_algorithms: bool,
-    need_update: bool
+    need_update: bool,
 ) -> tuple[bool, bool, bool, bool, bool]:
     """Draw things (except Visualise button)
 
@@ -396,21 +434,6 @@ def draw(
     WINDOW.fill(WHITE)
     pygame.draw.rect(WINDOW, DARK_BLUE, top)
     title.draw(WINDOW)
-
-    if algorithm_btn.draw(WINDOW):
-        show_algorithms = True
-
-    if visualise_btn.draw(WINDOW) and algo_idx > -1:
-        visualising = True
-
-    if clear_btn.draw(WINDOW):
-        maze.clear_board()
-        done_visualising = False
-        need_update = True
-
-    if generate_btn.draw(WINDOW):
-        show_generating_options = True
-
     texts = {
         "Start Node": RED,
         "Unvisited Node": WHITE,
@@ -435,7 +458,7 @@ def draw(
         WINDOW.blit(text_surf, (x + CELL_SIZE + 10, text_rect.y))
 
         if texts[text] == WHITE_2:
-            WINDOW.blit(weight, (x + 3, y + 3))
+            WINDOW.blit(WEIGHT, (x + 3, y + 3))
             x = 60
 
         elif texts[text] == DARK:
@@ -444,6 +467,20 @@ def draw(
             x += CELL_SIZE + 10 + text_surf.get_width() + 60
 
     label.draw(WINDOW)
+
+    if algorithm_btn.draw(WINDOW):
+        show_algorithms = True
+
+    if visualise_btn.draw(WINDOW) and algo_idx > -1:
+        visualising = True
+
+    if clear_btn.draw(WINDOW):
+        maze.clear_board()
+        done_visualising = False
+        need_update = True
+
+    if generate_btn.draw(WINDOW):
+        show_generating_options = True
 
     maze.draw()
     return show_algorithms, need_update, visualising, show_generating_options, done_visualising
