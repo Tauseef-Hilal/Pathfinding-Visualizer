@@ -1,10 +1,9 @@
-import math
 import sys
 import pygame
 
-from src.animations import Animator
 
-from .maze import Maze, WEIGHT, AnimatingNode
+from .animations import Animator, AnimatingNode
+from .maze import Maze, WEIGHT
 from .button import Button
 from .constants import (
     BLUE,
@@ -270,7 +269,7 @@ def main() -> None:
             animator.animating = True
             show_generating_options = False
             visualising = False
-            animator.animate_walls()
+            animator.animate_nodes()
         else:
             animator.animating = False
 
@@ -304,7 +303,6 @@ def main() -> None:
                 visualising, done_visualising, generate, show_generating_options, clear_btn, label, show_algorithms, need_update
             )
             maze.solve(algo_list[algo_idx].text)
-            need_update = False
             visualising = False
             done_visualising = True
 
@@ -468,18 +466,19 @@ def draw(
 
     label.draw(WINDOW)
 
-    if algorithm_btn.draw(WINDOW):
+    if algorithm_btn.draw(WINDOW) and not maze.animator.animating:
         show_algorithms = True
 
-    if visualise_btn.draw(WINDOW) and algo_idx > -1:
+    if visualise_btn.draw(WINDOW) and algo_idx > -1 \
+            and not maze.animator.animating:
         visualising = True
 
-    if clear_btn.draw(WINDOW):
+    if clear_btn.draw(WINDOW) and not maze.animator.animating:
         maze.clear_board()
         done_visualising = False
         need_update = True
 
-    if generate_btn.draw(WINDOW):
+    if generate_btn.draw(WINDOW) and not maze.animator.animating:
         show_generating_options = True
 
     maze.draw()

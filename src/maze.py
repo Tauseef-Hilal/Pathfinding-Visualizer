@@ -11,6 +11,7 @@ from .pathfinder.models.search_types import Search
 
 from .constants import (
     CELL_SIZE,
+    DARK_BLUE,
     GRAY,
     MAZE_HEIGHT,
     HEADER_HEIGHT,
@@ -114,6 +115,10 @@ class Maze:
                 cost = -1
             case "V":
                 cost = self.maze[pos[0]][pos[1]].cost
+            case "V1":
+                cost = self.maze[pos[0]][pos[1]].cost
+            case "V2":
+                cost = self.maze[pos[0]][pos[1]].cost
             case "*":
                 cost = self.maze[pos[0]][pos[1]].cost
             case _:
@@ -190,6 +195,10 @@ class Maze:
                         color = YELLOW
                     case "V":
                         color = BLUE
+                    case "V1":
+                        color = GREEN
+                    case "V2":
+                        color = DARK_BLUE
                     case _:
                         color = WHITE
 
@@ -224,7 +233,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes_to_animate, delay=True)
+        self.animator.add_nodes_to_animate(nodes_to_animate)
 
         nodes_to_animate = []
         for i in range(self.width):
@@ -241,7 +250,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes_to_animate, delay=True)
+        self.animator.add_nodes_to_animate(nodes_to_animate)
 
         nodes_to_animate = []
         for i in range(self.height):
@@ -271,7 +280,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes_to_animate, delay=True)
+        self.animator.add_nodes_to_animate(nodes_to_animate)
 
         self._generate_by_recursive_division(
             1, self.width - 2, 1, self.height - 2)
@@ -309,7 +318,7 @@ class Maze:
                     )
                 )
 
-        self.animator.add_nodes_to_animate(nodes_to_animate, delay=True)
+        self.animator.add_nodes_to_animate(nodes_to_animate, delay=0)
 
     def _generate_by_recursive_division(
         self,
@@ -414,7 +423,8 @@ class Maze:
                     color=DARK
                 )
             )
-        self.animator.add_nodes_to_animate(nodes_to_animate, delay=True)
+        self.animator.add_nodes_to_animate(nodes_to_animate)
+
         return wall
 
     def solve(
@@ -442,29 +452,44 @@ class Maze:
         solution = PathFinder.find_path(
             grid=grid,
             search=mapper[algo_name.strip()],
-            callback=self._draw_rect if visualize else None,
         )
 
         if not visualize:
             return solution
 
-        # If found a solution
-        if solution.path:
+        nodes = []
 
-            # Color the solution path in blue
-            for cell in solution.path[1:-1]:
-                self._draw_rect(coords=cell, color=YELLOW, delay=True)
-            pygame.display.update()
-            return solution
+        for cell in solution.explored[1:-1]:
+            x, y = self.coords[cell[0]][cell[1]]
+            nodes.append(
+                AnimatingNode(
+                    center=(x + 15, y + 15),
+                    rect=pygame.Rect(0, 0, 9, 9),
+                    ticks=pygame.time.get_ticks(),
+                    value="V",
+                    color=YELLOW if "*" in algo_name else GREEN,
+                    color_after=BLUE,
+                    duration=300
+                )
+            )
 
-        # Otherwise
-        msg = Button(
-            "NO SOLUTION!", "center", "center",
-            12, 70, foreground_color=pygame.Color(*RED), background_color=pygame.Color(*DARK)
-        )
+        self.animator.add_nodes_to_animate(nodes, gap=17)
 
-        msg.draw(surf=self.surface)
-        pygame.display.update()
+        # Color the solution path in blue
+        nodes = []
+        for cell in solution.path[1:-1]:
+            x, y = self.coords[cell[0]][cell[1]]
+            nodes.append(
+                AnimatingNode(
+                    center=(x + 15, y + 15),
+                    rect=pygame.Rect(0, 0, 9, 9),
+                    ticks=pygame.time.get_ticks(),
+                    value="*",
+                    color=YELLOW,
+                    duration=300
+                )
+            )
+        self.animator.add_nodes_to_animate(nodes, gap=34)
 
         return solution
 
@@ -472,7 +497,6 @@ class Maze:
             self,
             coords: tuple[int, int],
             color: tuple[int, int, int] = BLUE,
-            delay: bool = False,
             node: AnimatingNode | None = None
     ) -> None:
         """Color an existing cell in the maze
@@ -498,10 +522,10 @@ class Maze:
                 x, y, CELL_SIZE, CELL_SIZE)
         )
 
-        if color in (BLUE, WHITE) and not node:
+        if color in (BLUE, WHITE, GREEN, DARK_BLUE):
             pygame.draw.rect(
                 surface=self.surface,
-                color=GRAY,
+                color=BLUE if color == YELLOW else GRAY,
                 rect=pygame.Rect(x, y, CELL_SIZE, CELL_SIZE),
                 width=1
             )
@@ -516,16 +540,3 @@ class Maze:
             text_rect = text.get_rect()
             text_rect.center = image_rect.center
             self.surface.blit(text, text_rect)
-
-        # Wait for 20ms
-        if not delay:
-            return
-
-        if color != DARK:
-            self.set_cell((row, col), "V" if color == BLUE else "*")
-            pygame.time.delay(20)
-        else:
-            self.set_cell((row, col), "#")
-            pygame.time.delay(10)
-
-        pygame.display.update()

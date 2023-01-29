@@ -12,15 +12,19 @@ class AnimatingNode:
         ticks: int,
         value: str,
         color: tuple[int, int, int],
+        color_after: tuple[int, int, int] | None = None,
         duration: int = 300
     ) -> None:
         self.rect = rect
         self.ticks = ticks
+        self.start = self.ticks
         self.value = value
         self.color = color
+        self.color_after = color_after
         self.progress = 0
         self.duration = duration
         self.center = center
+        self.time_updated = False
 
     def __repr__(self) -> str:
         return f"AnimatingNode{tuple(vars(self).values())}"
@@ -38,7 +42,12 @@ class Animator:
         self.animating = False
         self.nodes_to_animate: list[AnimatingNode] = []
 
-    def add_nodes_to_animate(self, nodes: list[AnimatingNode], delay=False):
+    def add_nodes_to_animate(
+        self,
+        nodes: list[AnimatingNode],
+        delay: int = 0,
+        gap: int = 10
+    ) -> None:
         """Add nodes for animation
 
         Args:
@@ -48,56 +57,61 @@ class Animator:
 
         # Update first node's ticks and add it to the list
         if len(self.nodes_to_animate):
-            nodes[0].ticks = self.nodes_to_animate[-1].ticks + 5
-            if delay:
-                nodes[0].ticks += 40
+            nodes[0].ticks = self.nodes_to_animate[-1].ticks + delay
 
         self.nodes_to_animate.append(nodes[0])
 
         # Rest of the nodes
         for i in range(1, len(nodes)):
-            nodes[i].ticks = nodes[i - 1].ticks + 5
+            nodes[i].ticks = nodes[i - 1].ticks + gap
             self.nodes_to_animate.append(nodes[i])
 
-    def animate_walls(self):
+    def animate_nodes(self):
         """Animate nodes in the nodes_to_animate list
         """
         if not self.nodes_to_animate:
             return
 
-        for idx, node in enumerate(self.nodes_to_animate):
+        for node in self.nodes_to_animate:
+            if not node.time_updated:
+                node.ticks += (pygame.time.get_ticks() - node.start)
+                node.time_updated = True
+
+        for node in self.nodes_to_animate[:]:
+
             node.progress += pygame.time.get_ticks() - node.ticks
             node.ticks = pygame.time.get_ticks()
 
             if node.progress < 0:
-                node.progress = 0
                 return
 
             if node.progress < node.duration / 2:
                 size = self._easeOutExpo(
                     node.progress, 9, 36 - 9, node.duration / 2
                 )
+
+                color = node.color
             else:
                 size = self._easeOutExpo(
                     node.progress - node.duration / 2,
                     36, 30 - 36, node.duration / 2
                 )
 
+                color = node.color_after if node.color_after else node.color
+
             node.rect.width = node.rect.height = int(size)
             node.rect.center = node.center
-
-            if node.progress >= node.duration:
-                pos = self.maze.get_cell_pos(node.rect.topleft)
-                if self.maze.get_cell_value(pos) != "#":
-                    self.maze.set_cell(pos, node.value)
-
-                self.nodes_to_animate.pop(idx)
 
             if node.color == WHITE:
                 pygame.draw.rect(self.surface, GRAY, node.rect)
                 pygame.draw.rect(self.surface, DARK, node.rect, width=8)
             else:
-                pygame.draw.rect(self.surface, node.color, node.rect)
+                pygame.draw.rect(self.surface, color, node.rect)
+
+            if node.progress >= node.duration:
+                pos = self.maze.get_cell_pos(node.rect.topleft)
+                self.maze.set_cell(pos, node.value)
+                self.nodes_to_animate.remove(node)
 
     def _easeOutExpo(
         self,

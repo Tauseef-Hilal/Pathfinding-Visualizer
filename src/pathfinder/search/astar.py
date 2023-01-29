@@ -1,8 +1,5 @@
 from __future__ import annotations
-from typing import Optional
 
-
-from ..types import Visualiser
 from ..models.frontier import PriorityQueueFrontier
 from ..models.grid import Grid
 from ..models.solution import NoSolution, Solution
@@ -10,7 +7,7 @@ from ..models.solution import NoSolution, Solution
 
 class AStarSearch:
     @staticmethod
-    def search(grid: Grid, callback: Optional[Visualiser] = None) -> Solution:
+    def search(grid: Grid) -> Solution:
         """Find path between two points in a grid using A* Search
 
         Args:
@@ -38,7 +35,7 @@ class AStarSearch:
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
-                return NoSolution([], set(g_score))
+                return NoSolution([], list(g_score))
 
             # Remove node from the frontier
             node = frontier.pop()
@@ -57,11 +54,7 @@ class AStarSearch:
                 cells.append(grid.start)
                 cells.reverse()
 
-                return Solution(cells, set(g_score))
-
-            # Call the visualiser function, if provided
-            if node.parent and callback:
-                callback(node.state, delay=True)
+                return Solution(cells, list(g_score))
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():

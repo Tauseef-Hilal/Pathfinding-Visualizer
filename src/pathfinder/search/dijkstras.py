@@ -35,7 +35,7 @@ class DijkstrasSearch:
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
-                return NoSolution([], set(distance))
+                return NoSolution([], list(distance))
 
             # Remove node from the frontier
             node = frontier.pop()
@@ -54,7 +54,7 @@ class DijkstrasSearch:
                 cells.append(grid.start)
                 cells.reverse()
 
-                return Solution(cells, set(distance))
+                return Solution(cells, list(distance))
 
             # Call the visualiser function, if provided
             if node.parent and callback:

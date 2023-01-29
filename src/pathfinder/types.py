@@ -26,7 +26,6 @@ class SearchFunction(Protocol):
     def __call__(
         self,
         grid: Grid,
-        callback: Optional[Visualiser] = None
     ) -> Solution:
         """Find path between two points in a grid using a searching algorithm
 
@@ -38,4 +37,4 @@ class SearchFunction(Protocol):
         Returns:
             Solution: Solution found
         """
-        return NoSolution([], set())
+        return NoSolution([], [])

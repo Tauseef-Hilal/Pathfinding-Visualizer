@@ -21,6 +21,5 @@ class PathFinder:
     def find_path(
             grid: Grid,
             search: Search,
-            callback: Visualiser | None = None
     ) -> Solution:
-        return SEARCH[search](grid=grid, callback=callback)
+        return SEARCH[search](grid=grid)

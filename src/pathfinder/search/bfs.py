@@ -9,7 +9,7 @@ from ..models.solution import NoSolution, Solution
 
 class BreadthFirstSearch:
     @staticmethod
-    def search(grid: Grid, callback: Optional[Visualiser] = None) -> Solution:
+    def search(grid: Grid) -> Solution:
         """Find path between two points in a grid using Breadth First Search
 
         Args:
@@ -29,16 +29,12 @@ class BreadthFirstSearch:
         frontier.add(node)
 
         # Keep track of explored positions
-        explored_states = set()
+        explored_states = {}
 
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
-                return NoSolution([], set())
-
-            # Call the visualiser function, if provided
-            if node.parent and callback:
-                callback(node.state, delay=True)
+                return NoSolution([], [])
 
             # Remove node from the frontier
             node = frontier.remove()
@@ -58,10 +54,10 @@ class BreadthFirstSearch:
                 cells.append(grid.start)
                 cells.reverse()
 
-                return Solution(cells, explored_states)
+                return Solution(cells, list(explored_states))
 
             # Add current node position into the explored set
-            explored_states.add(node.state)
+            explored_states[node.state] = True
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():
