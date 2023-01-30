@@ -3,7 +3,7 @@
 Pathfinding visualizations with Python and Pygame.
 
 ## Video
-https://user-images.githubusercontent.com/67793598/215067519-b3a52ebf-c9d6-47a6-81c8-4049476c8626.mp4
+https://user-images.githubusercontent.com/67793598/215579096-16ce182c-d03d-41bb-9261-f4cd474911a8.mp4
 
 ## Screenshots
 <table border='0px'>
