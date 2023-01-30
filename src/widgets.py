@@ -97,3 +97,22 @@ class Button:
 
     def __repr__(self) -> str:
         return f"Button{tuple(vars(self).values())!r}"
+
+
+class Label(Button):
+    def draw(self, surf: pygame.surface.Surface) -> None:
+        """Draw label
+
+        Args:
+            surf (pygame.surface.Surface): Destination surface
+        """
+        # Draw label rectangle
+        pygame.draw.rect(surf, self.background_color, self.rect)
+
+        # Draw outline
+        if self.outline:
+            pygame.draw.rect(surf, BLACK, self.rect, width=self.outline)
+
+        # Render text
+        text_x, text_y = self.rect.x + self.padding, self.rect.y + self.padding
+        surf.blit(self.text_surf, (text_x, text_y))

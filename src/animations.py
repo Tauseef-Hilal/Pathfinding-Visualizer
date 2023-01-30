@@ -1,29 +1,40 @@
+from enum import Enum
 import math
 import pygame
 
-from .constants import DARK, GRAY, WHITE
+
+from .constants import DARK, FONT_14, GOAL, GRAY, GREEN, GREEN_2, START, WEIGHT
+
+
+class Animation(Enum):
+    WALL_ANIMATION = "WALL_ANIMATION"
+    WEIGHT_ANIMATION = "WEIGHT_ANIMATION"
+    PATH_ANIMATION = "PATH_ANIMATION"
 
 
 class AnimatingNode:
     def __init__(
         self,
-        center: tuple[int, int],
         rect: pygame.Rect,
-        ticks: int,
         value: str,
+        ticks: int,
+        center: tuple[int, int],
         color: tuple[int, int, int],
-        color_after: tuple[int, int, int] | None = None,
+        colors: list[tuple[int, int, int]] = [],
+        animation: Animation = Animation.WALL_ANIMATION,
         duration: int = 300
     ) -> None:
         self.rect = rect
-        self.ticks = ticks
-        self.start = self.ticks
         self.value = value
-        self.color = color
-        self.color_after = color_after
-        self.progress = 0
-        self.duration = duration
+        self.ticks = ticks
         self.center = center
+        self.color = color
+        self.colors = colors
+        self.animation = animation
+        self.duration = duration
+        
+        self.progress = 0
+        self.start = self.ticks
         self.time_updated = False
 
     def __repr__(self) -> str:
@@ -41,6 +52,7 @@ class Animator:
 
         self.animating = False
         self.nodes_to_animate: list[AnimatingNode] = []
+        self.need_update = False
 
     def add_nodes_to_animate(
         self,
@@ -65,6 +77,8 @@ class Animator:
         for i in range(1, len(nodes)):
             nodes[i].ticks = nodes[i - 1].ticks + gap
             self.nodes_to_animate.append(nodes[i])
+        
+        self.need_update = True
 
     def animate_nodes(self):
         """Animate nodes in the nodes_to_animate list
@@ -72,46 +86,175 @@ class Animator:
         if not self.nodes_to_animate:
             return
 
-        for node in self.nodes_to_animate:
-            if not node.time_updated:
-                node.ticks += (pygame.time.get_ticks() - node.start)
-                node.time_updated = True
+        # Update starting time for animating nodes
+        if self.need_update:
+            for node in self.nodes_to_animate:
+                if not node.time_updated:
+                    node.ticks += (pygame.time.get_ticks() - node.start)
+                    node.time_updated = True
 
+        # Animate every node
         for node in self.nodes_to_animate[:]:
-
             node.progress += pygame.time.get_ticks() - node.ticks
             node.ticks = pygame.time.get_ticks()
 
             if node.progress < 0:
-                return
-
-            if node.progress < node.duration / 2:
-                size = self._easeOutExpo(
-                    node.progress, 9, 36 - 9, node.duration / 2
-                )
-
-                color = node.color
+                continue
+            
+            # Call respective functions
+            if node.animation == Animation.WALL_ANIMATION:
+                self._wall_animation(node)
+            elif node.animation == Animation.PATH_ANIMATION:
+                self._path_animation(node)
             else:
-                size = self._easeOutExpo(
-                    node.progress - node.duration / 2,
-                    36, 30 - 36, node.duration / 2
+                self._weight_animation(node)
+
+            # Handle node images
+            row, col = self.maze.get_cell_pos(node.center)
+            if (row, col) == self.maze.start:
+                image_rect = START.get_rect(center=node.center)
+                self.surface.blit(START, image_rect)
+
+            elif (row, col) == self.maze.goal:
+                image_rect = GOAL.get_rect(center=node.center)
+                self.surface.blit(GOAL, image_rect)
+
+            elif (cost := self.maze.maze[row][col].cost) > 1:
+                image_rect = WEIGHT.get_rect(center=node.center)
+                self.surface.blit(WEIGHT, image_rect)
+
+                text = FONT_14.render(
+                    str(cost), True, GRAY
                 )
+                text_rect = text.get_rect()
+                text_rect.center = image_rect.center
+                self.surface.blit(text, text_rect)
 
-                color = node.color_after if node.color_after else node.color
-
-            node.rect.width = node.rect.height = int(size)
-            node.rect.center = node.center
-
-            if node.color == WHITE:
-                pygame.draw.rect(self.surface, GRAY, node.rect)
-                pygame.draw.rect(self.surface, DARK, node.rect, width=8)
-            else:
-                pygame.draw.rect(self.surface, color, node.rect)
-
+            # Update maze node and remove current animating node
             if node.progress >= node.duration:
                 pos = self.maze.get_cell_pos(node.rect.topleft)
                 self.maze.set_cell(pos, node.value)
                 self.nodes_to_animate.remove(node)
+
+    def _wall_animation(self, node: AnimatingNode) -> None:
+        """Handle wall animation
+
+        Args:
+            node (AnimatingNode): Wall node
+        """
+
+        # Calculate size as per ease-out func
+        if node.progress < node.duration / 2:
+            size = self._easeOutExpo(
+                node.progress, 9, 36 - 9, node.duration / 2
+            )
+        else:
+            size = self._easeOutExpo(
+                node.progress - node.duration / 2,
+                36, 30 - 36, node.duration / 2
+            )
+
+        # Update size
+        node.rect.width = node.rect.height = int(size)
+        node.rect.center = node.center
+
+        # Draw
+        pygame.draw.rect(self.surface, node.color, node.rect)
+
+    def _weight_animation(self, node: AnimatingNode) -> None:
+        """Handle weighted node animation
+
+        Args:
+            node (AnimatingNode): Weighted node
+        """
+
+        # Calculate size as per ease-out func
+        if node.progress < node.duration / 2:
+            size = self._easeOutExpo(
+                node.progress, 9, 36 - 9, node.duration / 2
+            )
+
+        else:
+            size = self._easeOutExpo(
+                node.progress - node.duration / 2,
+                36, 30 - 36, node.duration / 2
+            )
+
+        # Update size
+        node.rect.width = node.rect.height = int(size)
+        node.rect.center = node.center
+
+        # Draw
+        pygame.draw.rect(self.surface, GRAY, node.rect)
+        pygame.draw.rect(self.surface, DARK, node.rect, width=8)
+
+    def _path_animation(self, node: AnimatingNode) -> None:
+        """Animate solution path
+
+        Args:
+            node (AnimatingNode): Node in solution path
+        """
+        border_radius = 0
+
+        # Part 1 - Yellow rectangle
+        if node.progress < 0.05 * node.duration:
+            size = node.rect.width
+            color = node.colors[0]
+
+        # Part 2 - Purple circle
+        elif node.progress < 0.55 * node.duration:
+            progress = node.progress - 0.05 * node.duration
+            duration = 0.50 * node.duration
+            size = self._easeOutExpo(
+                progress,
+                1, 33 - 1, duration
+            )
+
+            if size < 32.8:
+                color = node.colors[1]
+            else:
+                color = node.colors[2]
+
+            border_radius = int(0.50 * size) if size < 30 else int(0.25 * size)
+
+        # Part 3 - Green - Blue rect
+        elif node.progress < node.duration:
+            progress = node.progress - 0.55 * node.duration
+            duration = 0.45 * node.duration
+
+            if progress < duration / 2:
+                color = node.colors[2]
+                size = self._easeOutExpo(
+                    progress,
+                    33, 36 - 33, duration / 2
+                )
+                border_radius = int(0.10 * 30)
+            else:
+                color = node.colors[-1]
+                size = self._easeOutExpo(
+                    progress - duration / 2,
+                    36, 30 - 36, duration / 2
+                )
+        else:
+            size = 30
+            color = node.colors[-1]
+
+        # Update size
+        node.rect.width = node.rect.height = int(size)
+        node.rect.center = node.center
+
+        # Draw
+        pygame.draw.rect(self.surface, color, node.rect,
+                         border_radius=border_radius)
+        
+        if color != node.colors[1]:
+            pygame.draw.rect(
+                self.surface,
+                GREEN if color == GREEN_2 else GRAY,
+                node.rect,
+                border_radius=border_radius,
+                width=1
+            )
 
     def _easeOutExpo(
         self,
