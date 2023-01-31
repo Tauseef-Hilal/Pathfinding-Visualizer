@@ -1,3 +1,4 @@
+import time
 from typing import Optional
 
 from ..types import Visualiser
@@ -20,6 +21,7 @@ class DepthFirstSearch:
         Returns:
             Solution: Solution found
         """
+        start_time = time.time()
 
         # Create Node for the source cell
         node = grid.get_node(pos=grid.start)
@@ -34,7 +36,10 @@ class DepthFirstSearch:
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
-                return NoSolution([], list(explored_states))
+                return NoSolution(
+                    [], list(explored_states), 
+                    (time.time() - start_time) * 1000
+                )
 
             # Remove node from the frontier
             node = frontier.remove()
@@ -53,7 +58,10 @@ class DepthFirstSearch:
                 cells.append(grid.start)
                 cells.reverse()
 
-                return Solution(cells, list(explored_states))
+                return Solution(
+                    cells, list(explored_states), 
+                    (time.time() - start_time) * 1000
+                )
 
             # Add current node position the explored set
             explored_states[node.state] = True

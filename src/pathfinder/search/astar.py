@@ -1,4 +1,5 @@
 from __future__ import annotations
+import time
 
 from ..models.frontier import PriorityQueueFrontier
 from ..models.grid import Grid
@@ -18,6 +19,8 @@ class AStarSearch:
         Returns:
             Solution: Solution found
         """
+        start_time = time.time()
+
         # Create Node for the source cell
         node = grid.get_node(pos=grid.start)
 
@@ -35,7 +38,9 @@ class AStarSearch:
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
-                return NoSolution([], list(g_score))
+                return NoSolution(
+                    [], list(g_score), (time.time() - start_time) * 1000
+                )
 
             # Remove node from the frontier
             node = frontier.pop()
@@ -54,7 +59,9 @@ class AStarSearch:
                 cells.append(grid.start)
                 cells.reverse()
 
-                return Solution(cells, list(g_score))
+                return Solution(
+                    cells, list(g_score), (time.time() - start_time) * 1000
+                )
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():

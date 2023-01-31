@@ -4,13 +4,15 @@ class Solution:
     def __init__(
         self,
         path: list[tuple[int, int]],
-        explored: list[tuple[int, int]]
+        explored: list[tuple[int, int]],
+        time: float
     ) -> None:
         self.path = path
         self.explored = explored
+        self.time = time
 
     def __repr__(self) -> str:
-        return f"Solution([{self.path[0]}, ..., {self.path[-1]}], {'{...}'})"
+        return f"Solution([{self.path[0]}, ..., {self.path[-1]}], {'{...}'}, {self.time})"
 
 
 class NoSolution(Solution):
@@ -18,4 +20,4 @@ class NoSolution(Solution):
 
     def __repr__(self) -> str:
         explored = list(self.explored)
-        return f"Solution([], {'{'}{explored[0]}, {explored[1]}, ...{'}'})"
+        return f"Solution([], {'{'}{explored[0]}, {explored[1]}, ...{'}'}, {self.time})"

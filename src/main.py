@@ -350,7 +350,8 @@ def main() -> None:
                     maze.set_cell((row, col), cell_value)
                     maze.set_cell(cell_under_mouse, "1")
 
-                    instant_algorithm(maze, label.text)
+                    text = label.text.split(" took")[0]
+                    instant_algorithm(maze, text)
                     cell_under_mouse = (row, col)
 
         # Update
@@ -366,7 +367,7 @@ def instant_algorithm(maze: Maze, algo_name: str):
         algo_name (str): Algorithm name
     """
     maze.clear_visited()
-
+    
     solution = maze.solve(
         algo_name=algo_name, visualize=False
     )
@@ -509,7 +510,18 @@ def draw(
     if visualise_btn.draw(WINDOW) and not label.text.startswith("Choose") \
             and not maze.animator.animating:
         maze.clear_visited()
-        maze.solve(label.text)
+
+        text = label.text.split(" takes")[0]
+        solution = maze.solve(text)
+        steps = len(solution.explored)
+        time_taken = solution.time
+        label = Label(
+            text  + f" takes {steps} steps in {time_taken:.2f}ms", "center", 0,
+            background_color=pygame.Color(*WHITE),
+            foreground_color=pygame.Color(*DARK),
+            padding=6, font_size=20, outline=False
+        )
+        label.rect.bottom = HEADER_HEIGHT - 10
         done_visualising = True
 
     if clear_btn.draw(WINDOW) and not maze.animator.animating:

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import time
 from typing import Optional
 
 
@@ -22,6 +23,8 @@ class DijkstrasSearch:
         Returns:
             Solution: Solution found
         """
+        start_time = time.time()
+
         # Create Node for the source cell
         node = grid.get_node(pos=grid.start)
 
@@ -35,7 +38,9 @@ class DijkstrasSearch:
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
-                return NoSolution([], list(distance))
+                return NoSolution(
+                    [], list(distance), (time.time() - start_time) * 1000
+                )
 
             # Remove node from the frontier
             node = frontier.pop()
@@ -54,7 +59,9 @@ class DijkstrasSearch:
                 cells.append(grid.start)
                 cells.reverse()
 
-                return Solution(cells, list(distance))
+                return Solution(
+                    cells, list(distance), (time.time() - start_time) * 1000
+                )
 
             # Call the visualiser function, if provided
             if node.parent and callback:
