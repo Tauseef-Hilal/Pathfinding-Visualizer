@@ -92,6 +92,8 @@ class Animator:
                 if not node.time_updated:
                     node.ticks += (pygame.time.get_ticks() - node.start)
                     node.time_updated = True
+            
+            self.need_update = False
 
         # Animate every node
         for node in self.nodes_to_animate[:]:
@@ -202,7 +204,7 @@ class Animator:
             color = node.colors[0]
 
         # Part 2 - Purple circle
-        elif node.progress < 0.55 * node.duration:
+        elif node.progress < 0.60 * node.duration:
             progress = node.progress - 0.05 * node.duration
             duration = 0.50 * node.duration
             size = self._easeOutExpo(
@@ -215,25 +217,25 @@ class Animator:
             else:
                 color = node.colors[2]
 
-            border_radius = int(0.50 * size) if size < 30 else int(0.25 * size)
+            border_radius = int(0.50 * size) if size < 30 else int(0.10 * size)
 
         # Part 3 - Green - Blue rect
         elif node.progress < node.duration:
-            progress = node.progress - 0.55 * node.duration
-            duration = 0.45 * node.duration
+            progress = node.progress - 0.60 * node.duration
+            duration = 0.40 * node.duration
 
-            if progress < duration / 2:
+            if progress < duration * 0.20:
                 color = node.colors[2]
                 size = self._easeOutExpo(
                     progress,
-                    33, 36 - 33, duration / 2
+                    33, 36 - 33, duration * 0.20
                 )
                 border_radius = int(0.10 * 30)
             else:
                 color = node.colors[-1]
                 size = self._easeOutExpo(
-                    progress - duration / 2,
-                    36, 30 - 36, duration / 2
+                    progress - duration * 0.20,
+                    36, 30 - 36, duration * 0.80
                 )
         else:
             size = 30

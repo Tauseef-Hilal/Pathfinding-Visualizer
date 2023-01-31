@@ -4,7 +4,7 @@ import pygame
 
 from .animations import Animation, Animator, AnimatingNode
 from .maze import GOAL, START, Maze, WEIGHT
-from .widgets import Button, Label
+from .widgets import Button, Label, Menu
 from .constants import (
     BLUE,
     CELL_SIZE,
@@ -54,7 +54,7 @@ algorithm_btn = Button(
     y=0,
     background_color=pygame.Color(*DARK_BLUE),
     foreground_color=pygame.Color(*WHITE),
-    padding=6, font_size=20, outline=False
+    font_size=20, outline=False
 )
 algorithm_btn.rect.centery = top.centery
 
@@ -65,7 +65,7 @@ algo_list = [
         y=algorithm_btn.rect.y + algorithm_btn.height,
         background_color=pygame.Color(*DARK_BLUE),
         foreground_color=pygame.Color(*WHITE),
-        padding=6, font_size=20, outline=False
+        font_size=20, outline=False
     ),
     Button(
         text="Dijkstra's Search",
@@ -73,7 +73,7 @@ algo_list = [
         y=algorithm_btn.rect.y + algorithm_btn.height * 2,
         background_color=pygame.Color(*DARK_BLUE),
         foreground_color=pygame.Color(*WHITE),
-        padding=6, font_size=20, outline=False
+        font_size=20, outline=False
     ),
     Button(
         text="Breadth First Search",
@@ -81,7 +81,7 @@ algo_list = [
         y=algorithm_btn.rect.y + algorithm_btn.height * 3,
         background_color=pygame.Color(*DARK_BLUE),
         foreground_color=pygame.Color(*WHITE),
-        padding=6, font_size=20, outline=False
+        font_size=20, outline=False
     ),
     Button(
         text="Depth First Search",
@@ -89,9 +89,11 @@ algo_list = [
         y=algorithm_btn.rect.y + algorithm_btn.height * 4,
         background_color=pygame.Color(*DARK_BLUE),
         foreground_color=pygame.Color(*WHITE),
-        padding=6, font_size=20, outline=False
+        font_size=20, outline=False
     ),
 ]
+
+algo_menu = Menu(button=algorithm_btn, children=algo_list)
 
 # Button instance for VISUALISE button
 visualise_btn = Button(
@@ -107,7 +109,7 @@ generate_btn = Button(
     "Generate Maze", 0, 0,
     background_color=pygame.Color(*DARK_BLUE),
     foreground_color=pygame.Color(*WHITE),
-    padding=6, font_size=20, outline=False
+    font_size=20, outline=False
 )
 generate_btn.rect.centery = top.centery
 generate_btn.rect.left = visualise_btn.rect.right + 120
@@ -115,21 +117,23 @@ generate_btn.rect.left = visualise_btn.rect.right + 120
 generating_options = [
     Button(
         text="Normal",
-        x=generate_btn.rect.x + 20,
+        x=generate_btn.rect.x - 40,
         y=generate_btn.rect.y + generate_btn.height,
         background_color=pygame.Color(*DARK_BLUE),
         foreground_color=pygame.Color(*WHITE),
-        padding=6, font_size=20, outline=False
+        font_size=20, outline=False
     ),
     Button(
         text="Weighted",
-        x=generate_btn.rect.x + 20,
+        x=generate_btn.rect.x - 40,
         y=generate_btn.rect.y + generate_btn.height * 2,
         background_color=pygame.Color(*DARK_BLUE),
         foreground_color=pygame.Color(*WHITE),
-        padding=6, font_size=20, outline=False
+        font_size=20, outline=False
     ),
 ]
+
+generate_menu = Menu(button=generate_btn, children=generating_options)
 
 # Button instance for Clear button
 clear_btn = Button(
@@ -156,15 +160,8 @@ def main() -> None:
     # Game loop
     mouse_is_down = False
     need_update = True
-    show_algorithms = False
-    algo_idx = -1
 
-    show_generating_options = False
-    generating_options_idx = -1
-
-    visualising = False
     done_visualising = False
-    generating = False
     draw_weighted_nodes = False
 
     dragging = False
@@ -215,13 +212,9 @@ def main() -> None:
                 cell_under_mouse = (-1, -1)
 
         if need_update:
-            show_algorithms, need_update, visualising, show_generating_options, done_visualising = draw(
+            label, done_visualising, need_update = draw(
                 label,
-                algo_idx,
-                visualising,
                 done_visualising,
-                show_generating_options,
-                show_algorithms,
                 need_update
             )
 
@@ -229,7 +222,8 @@ def main() -> None:
         draw_weighted_nodes, key = get_pressed()
 
         # Draw walls | weighted nodes
-        if mouse_is_down and not dragging and not visualising:
+        # This should not run when animating solution
+        if mouse_is_down and not dragging:
             pos = pygame.mouse.get_pos()
 
             if maze.mouse_within_bounds(pos):
@@ -272,15 +266,13 @@ def main() -> None:
 
         # Animate nodes
         if animator.nodes_to_animate:
-            visualising = False
-            show_generating_options = False
             animator.animating = True
             animator.animate_nodes()
         else:
             animator.animating = False
 
         # Handle moving start and target nodes
-        if dragging and not done_visualising and not visualising:
+        if dragging and not done_visualising and not animator.animating:
             x, y = pygame.mouse.get_pos()
             if cell_value == "A":
                 WINDOW.blit(START, (x - 10, y - 10))
@@ -288,7 +280,7 @@ def main() -> None:
                 WINDOW.blit(GOAL, (x - 10, y - 10))
 
         # Instantly find path if dragging post visualisation
-        if dragging and done_visualising and not visualising:
+        if dragging and done_visualising and not animator.animating:
             x, y = pygame.mouse.get_pos()
 
             if maze.mouse_within_bounds((x, y)):
@@ -299,96 +291,25 @@ def main() -> None:
                     maze.set_cell((row, col), cell_value)
                     maze.set_cell(cell_under_mouse, "1")
 
-                    instant_algorithm(maze, algo_list, algo_idx)
+                    instant_algorithm(maze, label.text)
                     cell_under_mouse = (row, col)
-
-        # Solve maze if visualise button is pressed and some
-        # algorithm is selected
-        if visualising and algo_idx > -1:
-            maze.clear_visited()
-            show_algorithms, need_update, visualising, show_generating_options, done_visualising = draw(
-                label,
-                algo_idx,
-                visualising,
-                done_visualising,
-                show_generating_options,
-                show_algorithms,
-                need_update
-            )
-            maze.solve(algo_list[algo_idx].text)
-            visualising = False
-            done_visualising = True
-
-        # Generate maze
-        if generating:
-            maze.generate_maze(weighted=generating_options_idx == 1)
-            generating = False
-
-        # Show algorithms list
-        if show_algorithms:
-            pygame.draw.rect(
-                WINDOW,
-                DARK_BLUE,
-                (algorithm_btn.rect.x - 50,
-                 algorithm_btn.rect.y + algorithm_btn.height,
-                 algorithm_btn.width * 2,
-                 algorithm_btn.height * len(algo_list) + 20),
-                border_radius=10
-            )
-            
-            # Handle selection
-            for btn in algo_list:
-                if btn.draw(WINDOW):
-                    show_algorithms = False
-                    algo_idx = algo_list.index(btn)
-                    label = Label(
-                        btn.text, "center", 0,
-                        background_color=pygame.Color(*WHITE),
-                        foreground_color=pygame.Color(*DARK),
-                        padding=6, font_size=20, outline=False
-                    )
-                    label.rect.bottom = HEADER_HEIGHT - 10
-
-                    if done_visualising:
-                        instant_algorithm(maze, algo_list, algo_idx)
-
-        # Show maze generating options
-        if show_generating_options:
-            pygame.draw.rect(
-                WINDOW,
-                DARK_BLUE,
-                (generate_btn.rect.x - 20,
-                 generate_btn.rect.y + generate_btn.height,
-                 generate_btn.width + 60,
-                 generate_btn.height * len(generating_options) + 20),
-                border_radius=10
-            )
-
-            # Handle selection
-            for btn in generating_options:
-                if btn.draw(WINDOW):
-                    show_generating_options = False
-                    generating_options_idx = generating_options.index(btn)
-                    generating = True
-                    maze.clear_board()
 
         # Update
         pygame.display.update()
         CLOCK.tick(FPS)
 
 
-def instant_algorithm(maze: Maze, algo_list: list[Button], algo_idx: int):
+def instant_algorithm(maze: Maze, algo_name: str):
     """Find path without animation
 
     Args:
-        maze (_type_): Maze
-        algo_list (_type_): Algorithm list
-        algo_idx (_type_): Algorithm index
+        maze (Maze): Maze
+        algo_name (str): Algorithm name
     """
     maze.clear_visited()
 
     solution = maze.solve(
-        algo_list[algo_idx].text, visualize=False
+        algo_name=algo_name, visualize=False
     )
 
     path = solution.path
@@ -429,30 +350,18 @@ def get_pressed() -> tuple[bool, int | None]:
 
 def draw(
     label: Label,
-    algo_idx: int,
-    visualising: bool,
     done_visualising: bool,
-    show_generating_options: bool,
-    show_algorithms: bool,
     need_update: bool,
-) -> tuple[bool, bool, bool, bool, bool]:
+) -> tuple[Label, bool, bool]:
     """Draw things (except Visualise button)
 
     Args:
         label (Label): Selected algorithm label
-        algo_idx (int): Index of selected algorithm
-        visualising (bool): Whether to visualise
         done_visualisiing (bool): Whether visualisation is done
-        show_generating_options (bool): Whether to show maze generation options
-        show_algorithms (bool): Whether to show algorithms list
         need_update (bool): Whether to redraw content
 
     Returns:
-        tuple[bool, bool, bool, bool, bool]: show_algorithms,
-                                             need_update,
-                                             visualising,
-                                             show_generating_options,
-                                             done_visualising
+        tuple[Label, bool, bool]: label, done_visualising, need_update,
     """
     # Fill white, draw top background and title text
     WINDOW.fill(WHITE)
@@ -506,27 +415,43 @@ def draw(
     label.draw(WINDOW)
 
     # Handle buttons
-    if algorithm_btn.draw(WINDOW) and not maze.animator.animating:
-        show_algorithms = True
-
-    if visualise_btn.draw(WINDOW) and algo_idx > -1 \
+    if (algo_menu.draw(WINDOW) or algo_menu.clicked) \
             and not maze.animator.animating:
-        visualising = True
+        if algo_menu.selected:
+            label = Label(
+                algo_menu.selected.text, "center", 0,
+                background_color=pygame.Color(*WHITE),
+                foreground_color=pygame.Color(*DARK),
+                padding=6, font_size=20, outline=False
+            )
+            label.rect.bottom = HEADER_HEIGHT - 10
+
+            if done_visualising:
+                instant_algorithm(maze, label.text)
+
+    if visualise_btn.draw(WINDOW) and not label.text.startswith("Choose") \
+            and not maze.animator.animating:
+        maze.clear_visited()
+        maze.solve(label.text)
+        done_visualising = True
 
     if clear_btn.draw(WINDOW) and not maze.animator.animating:
         maze.clear_board()
         done_visualising = False
         need_update = True
 
-    if generate_btn.draw(WINDOW) and not maze.animator.animating:
-        show_generating_options = True
+    if (generate_menu.draw(WINDOW) or generate_menu.clicked) \
+            and not animator.animating:
+        if generate_menu.selected:
+            maze.clear_board()
+            maze.generate_maze(
+                weighted=generate_menu.selected.text == "Weighted"
+            )
 
     maze.draw()
 
     return (
-        show_algorithms,
+        label,
+        done_visualising,
         need_update,
-        visualising,
-        show_generating_options,
-        done_visualising
     )

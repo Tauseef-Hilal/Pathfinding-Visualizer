@@ -2,6 +2,7 @@ import pygame
 
 from .constants import (
     BLACK,
+    DARK_BLUE,
     WIDTH,
     HEIGHT
 )
@@ -116,3 +117,68 @@ class Label(Button):
         # Render text
         text_x, text_y = self.rect.x + self.padding, self.rect.y + self.padding
         surf.blit(self.text_surf, (text_x, text_y))
+
+
+class Menu:
+    def __init__(self, button: Button, children: list[Button | Label]) -> None:
+        self.button = button
+        self.children = children
+        self.clicked = False
+        self.selected: Button | Label | None = None
+
+        self.height = sum(child.rect.height for child in children)
+        self.width = max(child.rect.width for child in children)
+
+        self.x = self.button.rect.x - 20
+        if self.width < self.button.width:
+            self.width = self.button.width + 40
+            self.x = self.button.rect.x
+
+        children[0].rect.x = self.x
+        children[0].rect.y = self.button.rect.bottom
+
+        for i, child in enumerate(children, 1):
+            prev = children[i - 1]
+            child.rect.x = self.x
+            child.rect.y = prev.rect.y
+
+    def draw(self, surf: pygame.surface.Surface) -> bool:
+        """Draw the menu
+
+        Args:
+            surf (pygame.surface.Surface): Window surface
+
+        Returns:
+            bool: Whether any button in this menu is clicked
+        """
+
+        clicked = self.button.draw(surf)
+        self.selected = None
+
+        if clicked:
+            self.clicked = True
+
+        if not self.clicked:
+            return False
+
+        # Whether button is clicked or not
+        action = False
+
+        pygame.draw.rect(
+            surf,
+            DARK_BLUE,
+            (self.x - 20,
+                self.button.rect.y + self.button.height,
+                self.width + 40,
+                self.height),
+            border_radius=10
+        )
+
+        # Handle selection
+        for child in self.children:
+            if child.draw(surf):
+                self.selected = child
+                self.clicked = False
+                action = True
+
+        return action
