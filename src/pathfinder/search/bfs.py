@@ -34,7 +34,7 @@ class BreadthFirstSearch:
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
-                return NoSolution([], [])
+                return NoSolution([], list(explored_states))
 
             # Remove node from the frontier
             node = frontier.remove()

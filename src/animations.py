@@ -32,7 +32,7 @@ class AnimatingNode:
         self.colors = colors
         self.animation = animation
         self.duration = duration
-        
+
         self.progress = 0
         self.start = self.ticks
         self.time_updated = False
@@ -77,7 +77,7 @@ class Animator:
         for i in range(1, len(nodes)):
             nodes[i].ticks = nodes[i - 1].ticks + gap
             self.nodes_to_animate.append(nodes[i])
-        
+
         self.need_update = True
 
     def animate_nodes(self):
@@ -92,7 +92,7 @@ class Animator:
                 if not node.time_updated:
                     node.ticks += (pygame.time.get_ticks() - node.start)
                     node.time_updated = True
-            
+
             self.need_update = False
 
         # Animate every node
@@ -102,7 +102,7 @@ class Animator:
 
             if node.progress < 0:
                 continue
-            
+
             # Call respective functions
             if node.animation == Animation.WALL_ANIMATION:
                 self._wall_animation(node)
@@ -248,7 +248,7 @@ class Animator:
         # Draw
         pygame.draw.rect(self.surface, color, node.rect,
                          border_radius=border_radius)
-        
+
         if color != node.colors[1]:
             pygame.draw.rect(
                 self.surface,

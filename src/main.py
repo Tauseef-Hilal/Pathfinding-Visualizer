@@ -15,6 +15,7 @@ from .constants import (
     GRAY,
     GREEN,
     HEADER_HEIGHT,
+    PURPLE,
     WHITE,
     WIDTH,
     HEIGHT,
@@ -34,7 +35,7 @@ top = pygame.Rect(0, 0, WIDTH, 80)
 
 # Title
 title = Label(
-    "Pathfinding Visualiser", 30, 0,
+    "Pathfinding Visualiser", 20, 0,
     background_color=pygame.Color(*DARK_BLUE),
     foreground_color=pygame.Color(*WHITE),
     padding=6, font_size=20, bold=True
@@ -50,7 +51,7 @@ maze.animator = animator
 # Algorithms list
 algorithm_btn = Button(
     text="Algorithms",
-    x=title.width + 100,
+    x=title.width + 50,
     y=0,
     background_color=pygame.Color(*DARK_BLUE),
     foreground_color=pygame.Color(*WHITE),
@@ -58,42 +59,86 @@ algorithm_btn = Button(
 )
 algorithm_btn.rect.centery = top.centery
 
-algo_list = [
-    Button(
-        text="A* Search",
-        x=algorithm_btn.rect.x - 40,
-        y=algorithm_btn.rect.y + algorithm_btn.height,
-        background_color=pygame.Color(*DARK_BLUE),
-        foreground_color=pygame.Color(*WHITE),
-        font_size=20, outline=False
-    ),
-    Button(
-        text="Dijkstra's Search",
-        x=algorithm_btn.rect.x - 40,
-        y=algorithm_btn.rect.y + algorithm_btn.height * 2,
-        background_color=pygame.Color(*DARK_BLUE),
-        foreground_color=pygame.Color(*WHITE),
-        font_size=20, outline=False
-    ),
-    Button(
-        text="Breadth First Search",
-        x=algorithm_btn.rect.x - 40,
-        y=algorithm_btn.rect.y + algorithm_btn.height * 3,
-        background_color=pygame.Color(*DARK_BLUE),
-        foreground_color=pygame.Color(*WHITE),
-        font_size=20, outline=False
-    ),
-    Button(
-        text="Depth First Search",
-        x=algorithm_btn.rect.x - 40,
-        y=algorithm_btn.rect.y + algorithm_btn.height * 4,
-        background_color=pygame.Color(*DARK_BLUE),
-        foreground_color=pygame.Color(*WHITE),
-        font_size=20, outline=False
-    ),
-]
 
-algo_menu = Menu(button=algorithm_btn, children=algo_list)
+algo_menu = Menu(
+    button=algorithm_btn,
+    children=[
+        Button(
+            text="A* Search",
+            x=algorithm_btn.rect.x - 40,
+            y=0,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+        Button(
+            text="Dijkstra's Search",
+            x=algorithm_btn.rect.x - 40,
+            y=algorithm_btn.rect.y + algorithm_btn.height * 2,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+        Button(
+            text="Breadth First Search",
+            x=algorithm_btn.rect.x - 40,
+            y=algorithm_btn.rect.y + algorithm_btn.height * 3,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+        Button(
+            text="Depth First Search",
+            x=algorithm_btn.rect.x - 40,
+            y=algorithm_btn.rect.y + algorithm_btn.height * 4,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+    ]
+)
+
+speed_btn = Button(
+    text="Speed",
+    x=algorithm_btn.rect.right + 40,
+    y=0,
+    background_color=pygame.Color(*DARK_BLUE),
+    foreground_color=pygame.Color(*WHITE),
+    font_size=20, outline=False
+)
+speed_btn.rect.centery = top.centery
+speed_btn.rect.y -= 15
+
+
+speed_menu = Menu(
+    button=speed_btn,
+    children=[
+        Button(
+            text="Fast",
+            x=0,
+            y=0,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+        Button(
+            text="Medium",
+            x=0,
+            y=0,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+        Button(
+            text="Slow",
+            x=0,
+            y=0,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+    ]
+)
 
 # Button instance for VISUALISE button
 visualise_btn = Button(
@@ -114,26 +159,29 @@ generate_btn = Button(
 generate_btn.rect.centery = top.centery
 generate_btn.rect.left = visualise_btn.rect.right + 120
 
-generating_options = [
-    Button(
-        text="Normal",
-        x=generate_btn.rect.x - 40,
-        y=generate_btn.rect.y + generate_btn.height,
-        background_color=pygame.Color(*DARK_BLUE),
-        foreground_color=pygame.Color(*WHITE),
-        font_size=20, outline=False
-    ),
-    Button(
-        text="Weighted",
-        x=generate_btn.rect.x - 40,
-        y=generate_btn.rect.y + generate_btn.height * 2,
-        background_color=pygame.Color(*DARK_BLUE),
-        foreground_color=pygame.Color(*WHITE),
-        font_size=20, outline=False
-    ),
-]
 
-generate_menu = Menu(button=generate_btn, children=generating_options)
+generate_menu = Menu(
+    button=generate_btn,
+    children=[
+        Button(
+            text="Normal",
+            x=generate_btn.rect.x - 40,
+            y=generate_btn.rect.y + generate_btn.height,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+        Button(
+            text="Weighted",
+            x=generate_btn.rect.x - 40,
+            y=generate_btn.rect.y + generate_btn.height * 2,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+    ]
+)
+
 
 # Button instance for Clear button
 clear_btn = Button(
@@ -143,7 +191,7 @@ clear_btn = Button(
     padding=6, font_size=20, outline=False
 )
 clear_btn.rect.centery = top.centery
-clear_btn.rect.right = WIDTH - 30
+clear_btn.rect.right = WIDTH - 20
 
 
 def main() -> None:
@@ -156,6 +204,16 @@ def main() -> None:
         padding=6, font_size=20, outline=False
     )
     label.rect.bottom = HEADER_HEIGHT - 10
+
+    speed_label = Label(
+        text="Fast",
+        font_size=16,
+        x=speed_btn.rect.x,
+        y=speed_btn.rect.bottom,
+        foreground_color=pygame.Color(*WHITE),
+        background_color=pygame.Color(*PURPLE),
+    )
+    speed_label.rect.centerx = speed_btn.rect.centerx
 
     # Game loop
     mouse_is_down = False
@@ -212,8 +270,9 @@ def main() -> None:
                 cell_under_mouse = (-1, -1)
 
         if need_update:
-            label, done_visualising, need_update = draw(
+            label, speed_label, done_visualising, need_update = draw(
                 label,
+                speed_label,
                 done_visualising,
                 need_update
             )
@@ -350,9 +409,10 @@ def get_pressed() -> tuple[bool, int | None]:
 
 def draw(
     label: Label,
+    speed_label: Label,
     done_visualising: bool,
     need_update: bool,
-) -> tuple[Label, bool, bool]:
+) -> tuple[Label, Label, bool, bool]:
     """Draw things (except Visualise button)
 
     Args:
@@ -361,7 +421,7 @@ def draw(
         need_update (bool): Whether to redraw content
 
     Returns:
-        tuple[Label, bool, bool]: label, done_visualising, need_update,
+        tuple[Label, Label, bool, bool]: label, speed_label, done_visualising, need_update,
     """
     # Fill white, draw top background and title text
     WINDOW.fill(WHITE)
@@ -396,7 +456,7 @@ def draw(
 
         # Formating
         if texts[text] == DARK:
-            y += text_surf.get_height() + 20
+            y += text_surf.get_height() + 30
         else:
             x += CELL_SIZE + 10 + text_surf.get_width() + 60
 
@@ -413,6 +473,9 @@ def draw(
 
     # Draw algo label
     label.draw(WINDOW)
+    speed_label.draw(WINDOW)
+
+    maze.draw()
 
     # Handle buttons
     if (algo_menu.draw(WINDOW) or algo_menu.clicked) \
@@ -428,6 +491,20 @@ def draw(
 
             if done_visualising:
                 instant_algorithm(maze, label.text)
+
+    if (speed_menu.draw(WINDOW) or speed_menu.clicked) \
+            and not maze.animator.animating:
+        if speed_menu.selected:
+            speed_label = Label(
+                text=speed_menu.selected.text,
+                font_size=16,
+                x=speed_btn.rect.x,
+                y=speed_btn.rect.bottom,
+                foreground_color=pygame.Color(*WHITE),
+                background_color=pygame.Color(*PURPLE),
+            )
+            speed_label.rect.centerx = speed_btn.rect.centerx
+            maze.set_speed(speed_menu.selected.text)
 
     if visualise_btn.draw(WINDOW) and not label.text.startswith("Choose") \
             and not maze.animator.animating:
@@ -448,10 +525,9 @@ def draw(
                 weighted=generate_menu.selected.text == "Weighted"
             )
 
-    maze.draw()
-
     return (
         label,
+        speed_label,
         done_visualising,
         need_update,
     )

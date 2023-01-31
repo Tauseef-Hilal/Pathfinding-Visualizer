@@ -129,18 +129,21 @@ class Menu:
         self.height = sum(child.rect.height for child in children)
         self.width = max(child.rect.width for child in children)
 
-        self.x = self.button.rect.x - 20
+        self.x = self.button.rect.x - 10
+        self.y = self.button.rect.y
+
         if self.width < self.button.width:
             self.width = self.button.width + 40
             self.x = self.button.rect.x
 
         children[0].rect.x = self.x
-        children[0].rect.y = self.button.rect.bottom
+        children[0].rect.top = self.button.rect.bottom
 
-        for i, child in enumerate(children, 1):
+        for i in range(1, len(children)):
+            child = children[i]
             prev = children[i - 1]
             child.rect.x = self.x
-            child.rect.y = prev.rect.y
+            child.rect.top = prev.rect.bottom
 
     def draw(self, surf: pygame.surface.Surface) -> bool:
         """Draw the menu
@@ -168,9 +171,9 @@ class Menu:
             surf,
             DARK_BLUE,
             (self.x - 20,
-                self.button.rect.y + self.button.height,
+                self.button.rect.bottom,
                 self.width + 40,
-                self.height),
+                self.height + 20),
             border_radius=10
         )
 

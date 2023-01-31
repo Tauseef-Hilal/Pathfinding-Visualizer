@@ -67,6 +67,9 @@ class Maze:
         # Generate screen coordinates for maze
         self.coords = self._generate_coordinates()
 
+        # ...
+        self.speed = "Fast"
+
     def _generate_coordinates(self) -> list[list[tuple[int, int]]]:
         """Generate screen coordinates for maze
 
@@ -146,6 +149,17 @@ class Maze:
         self.maze[pos[0]][pos[1]].value = value
         self.maze[pos[0]][pos[1]].cost = cost
         self.maze[pos[0]][pos[1]].color = color
+
+    def set_speed(self, speed_str: str) -> None:
+        """Set visualisation speed
+
+        Args:
+            speed_str (str): Speed string
+        """
+        if not speed_str in ("Fast", "Medium", "Slow"):
+            return
+
+        self.speed = speed_str
 
     def clear_board(self) -> None:
         """Clear maze walls
@@ -475,7 +489,20 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes, gap=10)
+        match self.speed:
+            case "Fast":
+                gap = 10
+            case "Medium":
+                gap = 60
+            case "Slow":
+                gap = 1000
+            case _:
+                gap = 10
+
+        self.animator.add_nodes_to_animate(nodes, gap=gap)
+
+        if not solution.path:
+            return solution
 
         # Color the shortest path in yellowd
         nodes = []
