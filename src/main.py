@@ -80,6 +80,14 @@ algo_menu = Menu(
             font_size=20, outline=False
         ),
         Button(
+            text="Greedy Best First Search",
+            x=algorithm_btn.rect.x - 40,
+            y=algorithm_btn.rect.y + algorithm_btn.height * 3,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+        Button(
             text="Breadth First Search",
             x=algorithm_btn.rect.x - 40,
             y=algorithm_btn.rect.y + algorithm_btn.height * 3,
