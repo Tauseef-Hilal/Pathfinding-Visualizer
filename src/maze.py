@@ -232,13 +232,55 @@ class Maze:
                 else:
                     self._draw_rect((i, j), node.color)
 
-    def generate_maze(self, weighted: bool = False) -> None:
+    def generate_maze(self, algorithm: str, weighted: bool = False) -> None:
         """Generate a new maze using recursive division algorithm
         Create an animated node for each wall and add that to 
         `animator.nodes_to_animate` list
         """
 
-        # Top horizontal
+        # Recursive division
+        if "Recursive Division" in algorithm:
+            self._draw_walls_around()
+            self._generate_by_recursive_division(
+                1, self.width - 2, 1, self.height - 2)
+        elif "Random" in algorithm:
+            self._generate_randomly()
+
+        # Return if need normal maze
+        if not weighted:
+            return
+
+        # Calculate optimal path
+        path = self.solve("A* Search", visualize=False).path
+
+        # Place weighted nodes randomly skipping walls and optimal path nodes
+        nodes_to_animate = []
+        for rowIdx, row in enumerate(self.maze):
+            for colIdx in range(0, len(row), 2):
+                if (rowIdx, colIdx) in path:
+                    continue
+
+                x, y = self.coords[rowIdx][colIdx]
+
+                for node in self.animator.nodes_to_animate:
+                    if node.center == (x + 15, y + 15):
+                        break
+                else:
+                    nodes_to_animate.append(
+                        AnimatingNode(
+                            rect=pygame.Rect(0, 0, 9, 9),
+                            center=(x + 15, y + 15),
+                            value=str(random.randint(1, 9)),
+                            ticks=pygame.time.get_ticks(),
+                            animation=Animation.WEIGHT_ANIMATION,
+                            color=WHITE,
+                            duration=50
+                        )
+                    )
+
+        self.animator.add_nodes_to_animate(nodes_to_animate, delay=0)
+
+    def _draw_walls_around(self):
         nodes_to_animate = []
         for i in range(self.width):
             x, y = self.coords[0][i]
@@ -297,43 +339,27 @@ class Maze:
 
         self.animator.add_nodes_to_animate(nodes_to_animate)
 
-        # Recursive division algorithm
-        self._generate_by_recursive_division(
-            1, self.width - 2, 1, self.height - 2)
-
-        # Return if need normal maze
-        if not weighted:
-            return
-
-        # Calculate optimal path
-        path = self.solve("A* Search", visualize=False).path
-
-        # Place weighted nodes randomly skipping walls and optimal path nodes
-        nodes_to_animate = []
-        for rowIdx, row in enumerate(self.maze):
-            for colIdx in range(0, len(row), 2):
-                if (rowIdx, colIdx) in path:
+    def _generate_randomly(self) -> None:
+        """Generate maze randomly
+        """
+        nodes = []
+        for rowIdx in range(self.width):
+            for colIdx in range(self.height):
+                if random.randint(1, 10) < 8:
                     continue
 
-                x, y = self.coords[rowIdx][colIdx]
-
-                for node in self.animator.nodes_to_animate:
-                    if node.center == (x + 15, y + 15):
-                        break
-                else:
-                    nodes_to_animate.append(
-                        AnimatingNode(
-                            rect=pygame.Rect(0, 0, 9, 9),
-                            center=(x + 15, y + 15),
-                            value=str(random.randint(1, 9)),
-                            ticks=pygame.time.get_ticks(),
-                            animation=Animation.WEIGHT_ANIMATION,
-                            color=WHITE,
-                            duration=50
-                        )
+                x, y = self.coords[colIdx][rowIdx]
+                nodes.append(
+                    AnimatingNode(
+                        rect=pygame.Rect(0, 0, 9, 9),
+                        center=(x + 15, y + 15),
+                        ticks=pygame.time.get_ticks(),
+                        value="#",
+                        color=DARK
                     )
+                )
 
-        self.animator.add_nodes_to_animate(nodes_to_animate, delay=0)
+        self.animator.add_nodes_to_animate(nodes)
 
     def _generate_by_recursive_division(
         self,

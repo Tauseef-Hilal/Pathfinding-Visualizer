@@ -164,7 +164,7 @@ generate_menu = Menu(
     button=generate_btn,
     children=[
         Button(
-            text="Normal",
+            text="Recursive Division",
             x=generate_btn.rect.x - 40,
             y=generate_btn.rect.y + generate_btn.height,
             background_color=pygame.Color(*DARK_BLUE),
@@ -172,7 +172,23 @@ generate_menu = Menu(
             font_size=20, outline=False
         ),
         Button(
-            text="Weighted",
+            text="Random Maze",
+            x=generate_btn.rect.x - 40,
+            y=generate_btn.rect.y + generate_btn.height * 2,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+        Button(
+            text="Recursive Division (Weighted)",
+            x=generate_btn.rect.x - 40,
+            y=generate_btn.rect.y + generate_btn.height,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+        Button(
+            text="Random Maze (Weighted)",
             x=generate_btn.rect.x - 40,
             y=generate_btn.rect.y + generate_btn.height * 2,
             background_color=pygame.Color(*DARK_BLUE),
@@ -350,7 +366,7 @@ def main() -> None:
                     maze.set_cell((row, col), cell_value)
                     maze.set_cell(cell_under_mouse, "1")
 
-                    text = label.text.split(" took")[0]
+                    text = label.text.split(" takes")[0]
                     instant_algorithm(maze, text)
                     cell_under_mouse = (row, col)
 
@@ -491,7 +507,8 @@ def draw(
             label.rect.bottom = HEADER_HEIGHT - 10
 
             if done_visualising:
-                instant_algorithm(maze, label.text)
+                text = label.text.split(" takes")[0]
+                instant_algorithm(maze, text)
 
     if (speed_menu.draw(WINDOW) or speed_menu.clicked) \
             and not maze.animator.animating:
@@ -534,7 +551,8 @@ def draw(
         if generate_menu.selected:
             maze.clear_board()
             maze.generate_maze(
-                weighted=generate_menu.selected.text == "Weighted"
+                algorithm=generate_menu.selected.text,
+                weighted="Weighted" in generate_menu.selected.text
             )
 
     return (
