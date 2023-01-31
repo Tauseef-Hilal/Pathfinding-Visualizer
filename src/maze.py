@@ -243,8 +243,12 @@ class Maze:
             self._draw_walls_around()
             self._generate_by_recursive_division(
                 1, self.width - 2, 1, self.height - 2)
+        elif "Basic Weight Maze" in algorithm:
+            self._generate_weight_maze()
+            return
         elif "Random" in algorithm:
             self._generate_randomly()
+            return
 
         # Return if need normal maze
         if not weighted:
@@ -338,6 +342,29 @@ class Maze:
             )
 
         self.animator.add_nodes_to_animate(nodes_to_animate)
+    
+    def _generate_weight_maze(self) -> None:
+        """Generate Weight maze
+        """
+        nodes = []
+        for rowIdx in range(self.width):
+            for colIdx in range(self.height):
+                if random.randint(1, 10) < 8:
+                    continue
+
+                x, y = self.coords[colIdx][rowIdx]
+                nodes.append(
+                    AnimatingNode(
+                        rect=pygame.Rect(0, 0, 9, 9),
+                        center=(x + 15, y + 15),
+                        ticks=pygame.time.get_ticks(),
+                        value="9",
+                        color=WHITE,
+                        animation=Animation.WEIGHT_ANIMATION
+                    )
+                )
+
+        self.animator.add_nodes_to_animate(nodes, gap=2)
 
     def _generate_randomly(self) -> None:
         """Generate maze randomly
