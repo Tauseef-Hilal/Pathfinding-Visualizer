@@ -107,6 +107,18 @@ class Maze:
 
         return self.maze[pos[0]][pos[1]].value
 
+    def get_node(self, pos: tuple[int, int]) -> MazeNode:
+        """Get cell node
+
+        Args:
+            pos (tuple[int, int]): Position of the cell
+
+        Returns:
+            MazeNode: Required node
+        """
+
+        return self.maze[pos[0]][pos[1]]
+
     def set_cell(self, pos: tuple[int, int], value: str, forced: bool = False) -> None:
         """Update a cell value in the maze
 
@@ -232,57 +244,84 @@ class Maze:
                 else:
                     self._draw_rect((i, j), node.color)
 
-    def generate_maze(self, algorithm: str, weighted: bool = False) -> None:
-        """Generate a new maze using recursive division algorithm
-        Create an animated node for each wall and add that to 
-        `animator.nodes_to_animate` list
+    def generate_maze(self, algorithm: str) -> None:
+        """Generate maze using an algorithm
+
+        Args:
+            algorithm (str): Algorithm name
         """
 
-        # Recursive division
-        if "Recursive Division" in algorithm:
-            self._draw_walls_around()
-            self._generate_by_recursive_division(
-                1, self.width - 2, 1, self.height - 2)
-        elif "Basic Weight Maze" in algorithm:
-            self._generate_weight_maze()
-            return
-        elif "Random" in algorithm:
-            self._generate_randomly()
-            return
+        match algorithm:
+            case "Recursive Division":
+                self._draw_walls_around()
+                self._generate_by_recursive_division(
+                    1, self.width - 2, 1, self.height - 2)
+            case "Randomised DFS":
+                self._randomised_dfs()
+            case "Basic Weight Maze":
+                self._generate_weight_maze()
+            case "Basic Random Maze":
+                self._generate_randomly()
 
-        # Return if need normal maze
-        if not weighted:
-            return
-
-        # Calculate optimal path
-        path = self.solve("A* Search", visualize=False).path
-
-        # Place weighted nodes randomly skipping walls and optimal path nodes
+    def _randomised_dfs(self) -> None:
+        """Generate maze by randomised dfs
+        """
         nodes_to_animate = []
-        for rowIdx, row in enumerate(self.maze):
-            for colIdx in range(0, len(row), 2):
-                if (rowIdx, colIdx) in path:
-                    continue
 
+        # Draw Walls everywhere except the start and goal pos
+        for rowIdx in range(self.height):
+            for colIdx in range(self.width):
+                self.set_cell((rowIdx, colIdx), "#")
+
+        stack = [self.start]
+        visited = set()
+        visited.add(self.start)
+
+        while stack:
+            curr = stack.pop()
+
+            neighbors = [(curr[0] + 2, curr[1]), (curr[0] - 2, curr[1]),
+                         (curr[0], curr[1] + 2), (curr[0], curr[1] - 2)]
+
+            unvisited = []
+            for neighbor in neighbors:
+                if (0 <= neighbor[0] < self.height
+                    and 0 <= neighbor[1] < self.width
+                        and neighbor not in visited):
+                    unvisited.append(neighbor)
+
+            if unvisited:
+                next = random.choice(unvisited)
+                stack.append(curr)
+
+                x, y = self.coords[next[0]][next[1]]
+                nodes_to_animate.append(
+                    AnimatingNode(
+                        rect=pygame.Rect(0, 0, 9, 9),
+                        center=(x + 15, y + 15),
+                        value="1",
+                        ticks=pygame.time.get_ticks(),
+                        color=PURPLE
+                    )
+                )
+
+                rowIdx = (curr[0] + next[0]) // 2
+                colIdx = (curr[1] + next[1]) // 2
                 x, y = self.coords[rowIdx][colIdx]
 
-                for node in self.animator.nodes_to_animate:
-                    if node.center == (x + 15, y + 15):
-                        break
-                else:
-                    nodes_to_animate.append(
-                        AnimatingNode(
-                            rect=pygame.Rect(0, 0, 9, 9),
-                            center=(x + 15, y + 15),
-                            value=str(random.randint(1, 9)),
-                            ticks=pygame.time.get_ticks(),
-                            animation=Animation.WEIGHT_ANIMATION,
-                            color=WHITE,
-                            duration=50
-                        )
+                nodes_to_animate.append(
+                    AnimatingNode(
+                        rect=pygame.Rect(0, 0, 9, 9),
+                        center=(x + 15, y + 15),
+                        value="1",
+                        ticks=pygame.time.get_ticks(),
+                        color=GREEN_2,
                     )
-
-        self.animator.add_nodes_to_animate(nodes_to_animate, delay=0)
+                )
+                visited.add(next)
+                stack.append(next)
+        
+        self.animator.add_nodes_to_animate(nodes_to_animate)
 
     def _draw_walls_around(self):
         nodes_to_animate = []
@@ -342,7 +381,7 @@ class Maze:
             )
 
         self.animator.add_nodes_to_animate(nodes_to_animate)
-    
+
     def _generate_weight_maze(self) -> None:
         """Generate Weight maze
         """
@@ -386,7 +425,7 @@ class Maze:
                     )
                 )
 
-        self.animator.add_nodes_to_animate(nodes)
+        self.animator.add_nodes_to_animate(nodes, gap=2)
 
     def _generate_by_recursive_division(
         self,

@@ -180,7 +180,15 @@ generate_menu = Menu(
             font_size=20, outline=False
         ),
         Button(
-            text="Random Maze",
+            text="Randomised DFS",
+            x=generate_btn.rect.x - 40,
+            y=generate_btn.rect.y + generate_btn.height,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+        Button(
+            text="Basic Random Maze",
             x=generate_btn.rect.x - 40,
             y=generate_btn.rect.y + generate_btn.height * 2,
             background_color=pygame.Color(*DARK_BLUE),
@@ -191,14 +199,6 @@ generate_menu = Menu(
             text="Basic Weight Maze",
             x=generate_btn.rect.x - 40,
             y=generate_btn.rect.y + generate_btn.height * 2,
-            background_color=pygame.Color(*DARK_BLUE),
-            foreground_color=pygame.Color(*WHITE),
-            font_size=20, outline=False
-        ),
-        Button(
-            text="Recursive Division (Weighted)",
-            x=generate_btn.rect.x - 40,
-            y=generate_btn.rect.y + generate_btn.height,
             background_color=pygame.Color(*DARK_BLUE),
             foreground_color=pygame.Color(*WHITE),
             font_size=20, outline=False
@@ -560,7 +560,6 @@ def draw(
             maze.clear_board()
             maze.generate_maze(
                 algorithm=generate_menu.selected.text,
-                weighted="Weighted" in generate_menu.selected.text
             )
 
     return (
