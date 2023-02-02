@@ -1,7 +1,27 @@
 # Pathfinding Visualizer
-A pathfinding visualizer made in Python and Pygame. This project aims to provide a fun and interactive way to learn about popular pathfinding algorithms such as Dijkstra's and A*.
+A pathfinding visualizer made in Python and Pygame. This project aims to provide a fun and interactive way to learn about popular pathfinding algorithms such as Dijkstra's, A* and other [supported algorithms](#supported-algorithms).
 
 https://user-images.githubusercontent.com/67793598/215579096-16ce182c-d03d-41bb-9261-f4cd474911a8.mp4
+
+## Features
+* Visualizes popular pathfinding algorithms such as Dijkstra's and A*.
+* Visualizes popular maze generation algorithms like Recursive division and Prim's algorithm.
+* Step-by-step animation of the search process, allowing you to see how the algorithms work.
+* Option to place obstacles on the grid to create custom maps.
+* Selectable starting and ending points on the grid.
+* Configurable speed of the animation. 
+* Clean and intuitive user interface.
+
+# Supported Algorithms
+The following pathfinding algorithms are currently supported in this visualizer:
+
+1. Depth First Search (DFS): A traversal-based algorithm that goes as far as possible along each branch before backtracking. Not commonly used for pathfinding.
+2. Breadth First Search (BFS): A traversal-based algorithm that explores all neighbors of a node before moving on to the next level. Guaranteed to find the shortest path in unweighted graphs.
+3. Greedy Best First Search: A heuristic search algorithm that prioritizes visiting nodes closest to the goal. Not guaranteed to find the shortest path, but often faster.
+4. A* Search: A heuristic search algorithm that combines the strengths of BFS and greedy best first search. Efficient for many types of graphs.
+5. Dijkstra's Search: A shortest path algorithm that uses a priority queue to prioritize visiting nodes with the smallest known cost. Guaranteed to find the shortest path in weighted graphs.
+
+Each algorithm uses a different approach to finding the shortest path between two points on a graph. Choose the one that best fits your use case and watch it in action.
 
 ## Requirements
 * Python 3.x: You can download the latest version of Python from the official website (https://www.python.org/downloads/).
@@ -9,14 +29,6 @@ https://user-images.githubusercontent.com/67793598/215579096-16ce182c-d03d-41bb-
 
 ## Usage
 Download the project repository to your local machine. Navigate to the project directory. Run 'python main.py' in your terminal to start the program.
-
-## Features
-* Visualizes popular pathfinding algorithms such as Dijkstra's and A*.
-* Selectable starting and ending points on the grid.
-* Option to place obstacles on the grid to create custom maps.
-* Step-by-step animation of the search process, allowing you to see how the algorithms work.
-* Configurable speed of the animation. 
-* Clean and intuitive user interface.
 
 ## Contributing
 This project is open to contributions, bug reports, and suggestions. If you've found a bug or have a suggestion, please open an issue.
