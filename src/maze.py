@@ -1,6 +1,7 @@
-import random
 import pygame
 
+
+from .generate import MazeGenerator
 from .animations import AnimatingNode, Animation, Animator
 from .pathfinder.models.node import Node
 from .pathfinder.models.solution import Solution
@@ -13,7 +14,6 @@ from .constants import (
     START,
     WEIGHT,
     CELL_SIZE,
-    DARK_BLUE,
     FONT_14,
     GRAY,
     GREEN_2,
@@ -48,6 +48,7 @@ class Maze:
     def __init__(self, surface: pygame.surface.Surface) -> None:
         self.surface = surface
         self.animator: Animator
+        self.generator: MazeGenerator
 
         self.width = MAZE_WIDTH // CELL_SIZE
         self.height = MAZE_HEIGHT // CELL_SIZE
@@ -254,76 +255,22 @@ class Maze:
         match algorithm:
             case "Recursive Division":
                 self._draw_walls_around()
-                self._generate_by_recursive_division(
+                self.generator.recursive_division(
                     1, self.width - 2, 1, self.height - 2)
             case "Randomised DFS":
-                self._randomised_dfs()
+                self.generator.randomised_dfs()
+            case "Prim's Algorithm":
+                self.generator.randomised_prims_algorithm()
             case "Basic Weight Maze":
-                self._generate_weight_maze()
+                self.generator.basic_weight_maze()
             case "Basic Random Maze":
-                self._generate_randomly()
+                self.generator.basic_random_maze()
 
-    def _randomised_dfs(self) -> None:
-        """Generate maze by randomised dfs
+    def _draw_walls_around(self) -> None:
+        """Draw walls around the maze
         """
-        nodes_to_animate = []
 
-        # Draw Walls everywhere except the start and goal pos
-        for rowIdx in range(self.height):
-            for colIdx in range(self.width):
-                self.set_cell((rowIdx, colIdx), "#")
-
-        stack = [self.start]
-        visited = set()
-        visited.add(self.start)
-
-        while stack:
-            curr = stack.pop()
-
-            neighbors = [(curr[0] + 2, curr[1]), (curr[0] - 2, curr[1]),
-                         (curr[0], curr[1] + 2), (curr[0], curr[1] - 2)]
-
-            unvisited = []
-            for neighbor in neighbors:
-                if (0 <= neighbor[0] < self.height
-                    and 0 <= neighbor[1] < self.width
-                        and neighbor not in visited):
-                    unvisited.append(neighbor)
-
-            if unvisited:
-                next = random.choice(unvisited)
-                stack.append(curr)
-
-                x, y = self.coords[next[0]][next[1]]
-                nodes_to_animate.append(
-                    AnimatingNode(
-                        rect=pygame.Rect(0, 0, 9, 9),
-                        center=(x + 15, y + 15),
-                        value="1",
-                        ticks=pygame.time.get_ticks(),
-                        color=PURPLE
-                    )
-                )
-
-                rowIdx = (curr[0] + next[0]) // 2
-                colIdx = (curr[1] + next[1]) // 2
-                x, y = self.coords[rowIdx][colIdx]
-
-                nodes_to_animate.append(
-                    AnimatingNode(
-                        rect=pygame.Rect(0, 0, 9, 9),
-                        center=(x + 15, y + 15),
-                        value="1",
-                        ticks=pygame.time.get_ticks(),
-                        color=GREEN_2,
-                    )
-                )
-                visited.add(next)
-                stack.append(next)
-        
-        self.animator.add_nodes_to_animate(nodes_to_animate)
-
-    def _draw_walls_around(self):
+        # Top Horizontal
         nodes_to_animate = []
         for i in range(self.width):
             x, y = self.coords[0][i]
@@ -381,158 +328,6 @@ class Maze:
             )
 
         self.animator.add_nodes_to_animate(nodes_to_animate)
-
-    def _generate_weight_maze(self) -> None:
-        """Generate Weight maze
-        """
-        nodes = []
-        for rowIdx in range(self.width):
-            for colIdx in range(self.height):
-                if random.randint(1, 10) < 8:
-                    continue
-
-                x, y = self.coords[colIdx][rowIdx]
-                nodes.append(
-                    AnimatingNode(
-                        rect=pygame.Rect(0, 0, 9, 9),
-                        center=(x + 15, y + 15),
-                        ticks=pygame.time.get_ticks(),
-                        value="9",
-                        color=WHITE,
-                        animation=Animation.WEIGHT_ANIMATION
-                    )
-                )
-
-        self.animator.add_nodes_to_animate(nodes, gap=2)
-
-    def _generate_randomly(self) -> None:
-        """Generate maze randomly
-        """
-        nodes = []
-        for rowIdx in range(self.width):
-            for colIdx in range(self.height):
-                if random.randint(1, 10) < 8:
-                    continue
-
-                x, y = self.coords[colIdx][rowIdx]
-                nodes.append(
-                    AnimatingNode(
-                        rect=pygame.Rect(0, 0, 9, 9),
-                        center=(x + 15, y + 15),
-                        ticks=pygame.time.get_ticks(),
-                        value="#",
-                        color=DARK
-                    )
-                )
-
-        self.animator.add_nodes_to_animate(nodes, gap=2)
-
-    def _generate_by_recursive_division(
-        self,
-        x1: int,
-        x2: int,
-        y1: int,
-        y2: int
-    ) -> None:
-        """Generate maze by recursive division algorithm
-
-        Args:
-            x1 (int): Grid row start
-            x2 (int): Grid row end
-            y1 (int): Grid column start
-            y2 (int): Grid column end
-        """
-        width = x2 - x1
-        height = y2 - y1
-
-        # Base case:
-        if width < 1 or height < 1:
-            return
-
-        # Whether to draw horizontally or vertically
-        horizontal = True if height > width else (
-            False if width != height else random.choice((True, False)))
-
-        # Arguments for reursive calls
-        args_list: list[tuple[int, int, int, int]] = []
-
-        # Divide the maze and add new grids' properties to args_list
-        if horizontal:
-            y = self.draw_line(x1, x2, y1, y2, horizontal=True)
-            args_list.extend([(x1, x2, y1, y - 1), (x1, x2, y + 1, y2)])
-        else:
-            x = self.draw_line(x1, x2, y1, y2)
-            args_list.extend([(x1, x - 1, y1, y2), (x + 1, x2, y1, y2)])
-
-        # Divide the two grids
-        for args in args_list:
-            self._generate_by_recursive_division(*args)
-
-    def draw_line(
-        self,
-        x1: int,
-        x2: int,
-        y1: int,
-        y2: int,
-        horizontal: bool = False
-    ) -> int:
-        """Draw walls horizontally or vertically
-
-        Args:
-            x1 (int): Grid row start
-            x2 (int): Grid row end
-            y1 (int): Grid column start
-            y2 (int): Grid column end
-            horizontal (bool, optional): Horizontal or vertical. Defaults to False.
-
-        Returns:
-            int: X or Y coordinate of wall line
-        """
-
-        # Handle horizontal division
-        if horizontal:
-            x1, y1 = y1, x1
-            x2, y2 = y2, x2
-
-        # Walls at even places
-        if x1 % 2 != 0:
-            x1 += 1
-        wall = random.randrange(x1, x2, 2)
-
-        # Holes at odd places
-        if y1 % 2 == 0:
-            y1 += 1
-        hole = random.randrange(y1, y2, 2)
-
-        # Coordinates
-        hole_coords = (hole, wall) if not horizontal else (wall, hole)
-        wall_coords = [-1, wall] if not horizontal else [wall, -1]
-
-        # Draw walls
-        nodes_to_animate = []
-        for i in range(y1, y2 + 1):
-            wall_coords[horizontal] = i
-            if hole_coords == tuple(wall_coords):
-                continue
-
-            # Create a rectangle
-            rect = pygame.Rect(0, 0, 9, 9)
-
-            # Set the starting position of the rectangle
-            x, y = self.coords[wall_coords[0]][wall_coords[1]]
-            rect.center = (x + 15, y + 15)
-            nodes_to_animate.append(
-                AnimatingNode(
-                    center=(x + 15, y + 15),
-                    rect=rect,
-                    ticks=pygame.time.get_ticks(),
-                    value="#",
-                    color=DARK
-                )
-            )
-        self.animator.add_nodes_to_animate(nodes_to_animate)
-
-        return wall
 
     def solve(
         self,

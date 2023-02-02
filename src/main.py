@@ -2,6 +2,7 @@ import sys
 import pygame
 
 
+from .generate import MazeGenerator
 from .animations import Animation, Animator, AnimatingNode
 from .maze import GOAL, START, Maze, WEIGHT
 from .widgets import Button, Label, Menu
@@ -45,7 +46,9 @@ title.rect.centery = top.centery
 # Instantiate Maze and Animator
 maze = Maze(surface=WINDOW)
 animator = Animator(surface=WINDOW, maze=maze)
+maze_generator = MazeGenerator(animator=animator)
 maze.animator = animator
+maze.generator = maze_generator
 
 
 # Algorithms list
@@ -173,6 +176,15 @@ generate_menu = Menu(
     children=[
         Button(
             text="Recursive Division",
+            x=generate_btn.rect.x - 40,
+            y=generate_btn.rect.y + generate_btn.height,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+
+        Button(
+            text="Prim's Algorithm",
             x=generate_btn.rect.x - 40,
             y=generate_btn.rect.y + generate_btn.height,
             background_color=pygame.Color(*DARK_BLUE),
@@ -391,7 +403,7 @@ def instant_algorithm(maze: Maze, algo_name: str):
         algo_name (str): Algorithm name
     """
     maze.clear_visited()
-    
+
     solution = maze.solve(
         algo_name=algo_name, visualize=False
     )
@@ -541,7 +553,7 @@ def draw(
         steps = len(solution.explored)
         time_taken = solution.time
         label = Label(
-            text  + f" takes {steps} steps in {time_taken:.2f}ms", "center", 0,
+            text + f" takes {steps} steps in {time_taken:.2f}ms", "center", 0,
             background_color=pygame.Color(*WHITE),
             foreground_color=pygame.Color(*DARK),
             padding=6, font_size=20, outline=False
