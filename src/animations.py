@@ -1,3 +1,4 @@
+from typing import Optional, Protocol
 from enum import Enum
 import math
 import pygame
@@ -12,6 +13,11 @@ class Animation(Enum):
     PATH_ANIMATION = "PATH_ANIMATION"
 
 
+class AnimationCallback(Protocol):
+    def __call__(self) -> None:
+        return None
+
+
 class AnimatingNode:
     def __init__(
         self,
@@ -20,9 +26,10 @@ class AnimatingNode:
         ticks: int,
         center: tuple[int, int],
         color: tuple[int, int, int],
+        after_animation: Optional[AnimationCallback] = None,
         colors: list[tuple[int, int, int]] = [],
         animation: Animation = Animation.WALL_ANIMATION,
-        duration: int = 300
+        duration: int = 300,
     ) -> None:
         self.rect = rect
         self.value = value
@@ -32,7 +39,7 @@ class AnimatingNode:
         self.colors = colors
         self.animation = animation
         self.duration = duration
-
+        self.after_animation = after_animation
         self.progress = 0
         self.start = self.ticks
         self.time_updated = False
@@ -46,9 +53,12 @@ class AnimatingNode:
 
 
 class Animator:
+
     def __init__(self, surface: pygame.surface.Surface, maze) -> None:
+        from .maze import Maze
+
         self.surface = surface
-        self.maze = maze
+        self.maze: Maze = maze
 
         self.animating = False
         self.nodes_to_animate: list[AnimatingNode] = []
@@ -137,6 +147,9 @@ class Animator:
                 pos = self.maze.get_cell_pos(node.rect.topleft)
                 self.maze.set_cell(pos, node.value)
                 self.nodes_to_animate.remove(node)
+
+                if node.after_animation:
+                    node.after_animation()
 
     def _wall_animation(self, node: AnimatingNode) -> None:
         """Handle wall animation

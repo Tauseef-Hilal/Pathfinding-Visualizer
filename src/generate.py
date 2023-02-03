@@ -1,4 +1,5 @@
 import random
+from typing import Any
 import pygame
 
 from .animations import AnimatingNode, Animation, Animator
@@ -6,9 +7,12 @@ from .constants import DARK, GREEN_2, PURPLE, WHITE
 
 
 class MazeGenerator:
+
     def __init__(self, animator: Animator) -> None:
+        from .maze import Maze
+
         self.animator = animator
-        self.maze = animator.maze
+        self.maze: Maze = animator.maze
 
     def _is_valid_cell(self, pos: tuple[int, int]) -> bool:
         """Check if the provided coords are valid
@@ -26,7 +30,7 @@ class MazeGenerator:
 
     def _get_two_step_neighbors(
         self,
-        maze: list[list[str]],
+        maze: list[list[Any]],
         cell: tuple[int, int],
         value: str = ""
     ) -> list[tuple[int, int]]:

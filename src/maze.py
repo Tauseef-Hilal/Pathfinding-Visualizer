@@ -1,8 +1,9 @@
+from typing import Optional
 import pygame
 
 
 from .generate import MazeGenerator
-from .animations import AnimatingNode, Animation, Animator
+from .animations import AnimatingNode, Animation, AnimationCallback, Animator
 from .pathfinder.models.node import Node
 from .pathfinder.models.solution import Solution
 from .pathfinder.main import PathFinder
@@ -329,11 +330,7 @@ class Maze:
 
         self.animator.add_nodes_to_animate(nodes_to_animate)
 
-    def solve(
-        self,
-        algo_name: str,
-        visualize: bool = True,
-    ) -> Solution:
+    def solve(self, algo_name: str,) -> Solution:
         """Solve the maze with an algorithm
 
         Args:
@@ -357,8 +354,19 @@ class Maze:
             search=mapper[algo_name.strip()],
         )
 
-        if not visualize:
-            return solution
+        return solution
+
+    def visualize(
+        self,
+        solution: Solution,
+        after_animation: Optional[AnimationCallback] = None,
+    ) -> None:
+        """Visualize solution
+
+        Args:
+            solution (Solution): Solution object
+            after_animation (Optional[AnimationCallback], optional): Called after animation. Defaults to None.
+        """
 
         # Animate solution nodes
         nodes = []
@@ -390,7 +398,7 @@ class Maze:
         self.animator.add_nodes_to_animate(nodes, gap=gap)
 
         if not solution.path:
-            return solution
+            return
 
         # Color the shortest path in yellowd
         nodes = []
@@ -403,13 +411,12 @@ class Maze:
                     ticks=self.animator.nodes_to_animate[0].ticks,
                     value="*",
                     color=YELLOW,
-                    duration=300
+                    duration=300,
                 )
             )
 
         self.animator.add_nodes_to_animate(nodes, delay=1500, gap=30)
-
-        return solution
+        self.animator.nodes_to_animate[-1].after_animation = after_animation
 
     def _draw_rect(
             self,

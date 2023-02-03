@@ -1,6 +1,8 @@
 import sys
 import pygame
 
+from src.state import State
+
 
 from .generate import MazeGenerator
 from .animations import Animation, Animator, AnimatingNode
@@ -44,6 +46,7 @@ title = Label(
 title.rect.centery = top.centery
 
 # Instantiate Maze and Animator
+state = State()
 maze = Maze(surface=WINDOW)
 animator = Animator(surface=WINDOW, maze=maze)
 maze_generator = MazeGenerator(animator=animator)
@@ -161,6 +164,37 @@ visualise_btn = Button(
 visualise_btn.rect.centery = top.centery
 
 #
+compare_btn = Button(
+    "Run All    ", 0, 0,
+    background_color=pygame.Color(*DARK_BLUE),
+    foreground_color=pygame.Color(*WHITE),
+    font_size=20, outline=False
+)
+compare_btn.rect.centery = top.centery
+compare_btn.rect.left = visualise_btn.rect.right + 40
+
+comapre_menu = Menu(
+    button=compare_btn,
+    children=[
+        Button(
+            text="Current Maze",
+            x=0,
+            y=0,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+        Button(
+            text="Different Mazes",
+            x=0,
+            y=0,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        ),
+    ]
+)
+
 generate_btn = Button(
     "Generate Maze", 0, 0,
     background_color=pygame.Color(*DARK_BLUE),
@@ -168,7 +202,7 @@ generate_btn = Button(
     font_size=20, outline=False
 )
 generate_btn.rect.centery = top.centery
-generate_btn.rect.left = visualise_btn.rect.right + 120
+generate_btn.rect.left = compare_btn.rect.right + 40
 
 
 generate_menu = Menu(
@@ -232,16 +266,15 @@ clear_btn.rect.right = WIDTH - 20
 
 def main() -> None:
     """Start here"""
-
-    label = Label(
+    state.label = Label(
         "Choose an algorithm", "center", 0,
         background_color=pygame.Color(*WHITE),
         foreground_color=pygame.Color(*DARK),
         padding=6, font_size=20, outline=False
     )
-    label.rect.bottom = HEADER_HEIGHT - 10
+    state.label.rect.bottom = HEADER_HEIGHT - 10
 
-    speed_label = Label(
+    state.speed_label = Label(
         text="Fast",
         font_size=16,
         x=speed_btn.rect.x,
@@ -249,13 +282,13 @@ def main() -> None:
         foreground_color=pygame.Color(*WHITE),
         background_color=pygame.Color(*PURPLE),
     )
-    speed_label.rect.centerx = speed_btn.rect.centerx
+    state.speed_label.rect.centerx = speed_btn.rect.centerx
 
     # Game loop
     mouse_is_down = False
-    need_update = True
+    state.done_visualising = False
+    state.need_update = True
 
-    done_visualising = False
     draw_weighted_nodes = False
 
     dragging = False
@@ -270,7 +303,7 @@ def main() -> None:
                 sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                need_update = True
+                state.need_update = True
                 pos = pygame.mouse.get_pos()
 
                 if not maze.mouse_within_bounds(pos):
@@ -297,7 +330,7 @@ def main() -> None:
                         break
 
                     row, col = maze.get_cell_pos(pos)
-                    if maze.get_cell_value((row, col)) in ("A", "B") or done_visualising:
+                    if maze.get_cell_value((row, col)) in ("A", "B") or state.done_visualising:
                         break
 
                     maze.set_cell((row, col), cell_value)
@@ -305,13 +338,8 @@ def main() -> None:
 
                 cell_under_mouse = (-1, -1)
 
-        if need_update:
-            label, speed_label, done_visualising, need_update = draw(
-                label,
-                speed_label,
-                done_visualising,
-                need_update
-            )
+        if state.need_update:
+            draw()
 
         # Get pressed keys for weighted nodes
         draw_weighted_nodes, key = get_pressed()
@@ -367,7 +395,7 @@ def main() -> None:
             animator.animating = False
 
         # Handle moving start and target nodes
-        if dragging and not done_visualising and not animator.animating:
+        if dragging and not state.done_visualising and not animator.animating:
             x, y = pygame.mouse.get_pos()
             if cell_value == "A":
                 WINDOW.blit(START, (x - 10, y - 10))
@@ -375,7 +403,7 @@ def main() -> None:
                 WINDOW.blit(GOAL, (x - 10, y - 10))
 
         # Instantly find path if dragging post visualisation
-        if dragging and done_visualising and not animator.animating:
+        if dragging and state.done_visualising and not animator.animating:
             x, y = pygame.mouse.get_pos()
 
             if maze.mouse_within_bounds((x, y)):
@@ -386,7 +414,7 @@ def main() -> None:
                     maze.set_cell((row, col), cell_value)
                     maze.set_cell(cell_under_mouse, "1")
 
-                    text = label.text.split(" takes")[0]
+                    text = state.label.text.split(" took")[0]
                     instant_algorithm(maze, text)
                     cell_under_mouse = (row, col)
 
@@ -404,9 +432,7 @@ def instant_algorithm(maze: Maze, algo_name: str):
     """
     maze.clear_visited()
 
-    solution = maze.solve(
-        algo_name=algo_name, visualize=False
-    )
+    solution = maze.solve(algo_name=algo_name)
 
     path = solution.path
     explored = solution.explored
@@ -444,21 +470,8 @@ def get_pressed() -> tuple[bool, int | None]:
     return False, None
 
 
-def draw(
-    label: Label,
-    speed_label: Label,
-    done_visualising: bool,
-    need_update: bool,
-) -> tuple[Label, Label, bool, bool]:
+def draw() -> None:
     """Draw things (except Visualise button)
-
-    Args:
-        label (Label): Selected algorithm label
-        done_visualisiing (bool): Whether visualisation is done
-        need_update (bool): Whether to redraw content
-
-    Returns:
-        tuple[Label, Label, bool, bool]: label, speed_label, done_visualising, need_update,
     """
     # Fill white, draw top background and title text
     WINDOW.fill(WHITE)
@@ -494,7 +507,7 @@ def draw(
         # Formating
         if texts[text] == DARK:
             y += text_surf.get_height() + 30
-        else:
+        elif text != "Weighted Node":
             x += CELL_SIZE + 10 + text_surf.get_width() + 60
 
         # Draw images for weighted, start and target node
@@ -509,8 +522,8 @@ def draw(
             WINDOW.blit(GOAL, image_rect)
 
     # Draw algo label
-    label.draw(WINDOW)
-    speed_label.draw(WINDOW)
+    state.label.draw(WINDOW)
+    state.speed_label.draw(WINDOW)
 
     maze.draw()
 
@@ -518,22 +531,22 @@ def draw(
     if (algo_menu.draw(WINDOW) or algo_menu.clicked) \
             and not maze.animator.animating:
         if algo_menu.selected:
-            label = Label(
+            state.label = Label(
                 algo_menu.selected.text, "center", 0,
                 background_color=pygame.Color(*WHITE),
                 foreground_color=pygame.Color(*DARK),
                 padding=6, font_size=20, outline=False
             )
-            label.rect.bottom = HEADER_HEIGHT - 10
+            state.label.rect.bottom = HEADER_HEIGHT - 10
 
-            if done_visualising:
-                text = label.text.split(" takes")[0]
+            if state.done_visualising:
+                text = state.label.text.split(" takes")[0]
                 instant_algorithm(maze, text)
 
     if (speed_menu.draw(WINDOW) or speed_menu.clicked) \
             and not maze.animator.animating:
         if speed_menu.selected:
-            speed_label = Label(
+            state.speed_label = Label(
                 text=speed_menu.selected.text,
                 font_size=16,
                 x=speed_btn.rect.x,
@@ -541,30 +554,51 @@ def draw(
                 foreground_color=pygame.Color(*WHITE),
                 background_color=pygame.Color(*PURPLE),
             )
-            speed_label.rect.centerx = speed_btn.rect.centerx
+            state.speed_label.rect.centerx = speed_btn.rect.centerx
             maze.set_speed(speed_menu.selected.text)
 
-    if visualise_btn.draw(WINDOW) and not label.text.startswith("Choose") \
+    if visualise_btn.draw(WINDOW) \
+        and not state.label.text.startswith("Choose") \
             and not maze.animator.animating:
         maze.clear_visited()
 
-        text = label.text.split(" takes")[0]
+        def callback():
+            state.label = Label(
+                text +
+                f" took {steps} steps in {time_taken:.2f}ms", "center", 0,
+                background_color=pygame.Color(*WHITE),
+                foreground_color=pygame.Color(*DARK),
+                padding=6, font_size=20, outline=False
+            )
+            state.label.rect.bottom = HEADER_HEIGHT - 10
+            state.label.draw(WINDOW)
+
+        text = state.label.text.split(" took")[0]
+        text = text.split("Running ")[-1]
+
         solution = maze.solve(text)
+        maze.visualize(solution=solution, after_animation=callback)
+
         steps = len(solution.explored)
         time_taken = solution.time
-        label = Label(
-            text + f" takes {steps} steps in {time_taken:.2f}ms", "center", 0,
+        state.label = Label(
+            f"Running {text}", "center", 0,
             background_color=pygame.Color(*WHITE),
             foreground_color=pygame.Color(*DARK),
             padding=6, font_size=20, outline=False
         )
-        label.rect.bottom = HEADER_HEIGHT - 10
-        done_visualising = True
+        state.label.rect.bottom = HEADER_HEIGHT - 10
+
+        state.done_visualising = True
 
     if clear_btn.draw(WINDOW) and not maze.animator.animating:
         maze.clear_board()
-        done_visualising = False
-        need_update = True
+        state.done_visualising = False
+        state.need_update = True
+
+    if (comapre_menu.draw(WINDOW) or comapre_menu.clicked) \
+            and not animator.animating:
+        pass
 
     if (generate_menu.draw(WINDOW) or generate_menu.clicked) \
             and not animator.animating:
@@ -573,10 +607,3 @@ def draw(
             maze.generate_maze(
                 algorithm=generate_menu.selected.text,
             )
-
-    return (
-        label,
-        speed_label,
-        done_visualising,
-        need_update,
-    )
