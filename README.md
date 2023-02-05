@@ -1,6 +1,33 @@
 # Pathfinding Visualizer
 A pathfinding visualizer made in Python and Pygame. This project aims to provide a fun and interactive way to learn about popular pathfinding algorithms such as Dijkstra's, A* and other [supported algorithms](#supported-algorithms).
 
+## Screenshots
+<table border='0px'>
+    <tr>
+        <td>
+            <img src='screenshots/Dijkstras.png?raw=true' 
+                 alt="Dijkstra's Search"
+                 width='360'>
+        </td>
+        <td>
+            <img src='screenshots/BFS.png?raw=true' 
+                 alt="Breadth-First Search"
+                 width='360'>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src='screenshots/AStar.png?raw=true' 
+                 alt="A* Search"
+                 width='360'>
+        </td>
+        <td>
+            <img src='screenshots/Results.png?raw=true' 
+                 alt="Results"
+                 width='360'>
+        </td>
+    </tr>
+</table>
 
 ## Features
 * Visualizes popular pathfinding algorithms such as Dijkstra's and A*.
@@ -11,7 +38,7 @@ A pathfinding visualizer made in Python and Pygame. This project aims to provide
 * Configurable speed of the animation. 
 * Clean and intuitive user interface.
 
-# Supported Algorithms
+## Supported Algorithms
 The following pathfinding algorithms are currently supported in this visualizer:
 
 1. Depth First Search (DFS): A traversal-based algorithm that goes as far as possible along each branch before backtracking. Not commonly used for pathfinding.
