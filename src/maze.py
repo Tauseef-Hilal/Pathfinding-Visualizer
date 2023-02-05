@@ -2,7 +2,7 @@ from typing import Optional
 import pygame
 
 
-from .generate import MazeGenerator
+from .generate import GenerationCallback, MazeGenerator
 from .animations import AnimatingNode, Animation, AnimationCallback, Animator
 from .pathfinder.models.node import Node
 from .pathfinder.models.solution import Solution
@@ -191,8 +191,11 @@ class Maze:
         for i in range(self.height):
             for j in range(self.width):
                 node = self.maze[i][j]
-                if node.value in ("V", "*", "V1", "V2"):
+                if node.value in ("V", "*"):
                     self.set_cell((i, j), str(node.cost))
+
+        self.set_cell(self.start, "A", forced=True)
+        self.set_cell(self.goal, "B", forced=True)
 
     def mouse_within_bounds(self, pos: tuple[int, int]) -> bool:
         """Check if mouse cursor is inside the maze
@@ -246,7 +249,11 @@ class Maze:
                 else:
                     self._draw_rect((i, j), node.color)
 
-    def generate_maze(self, algorithm: str) -> None:
+    def generate_maze(
+        self,
+        algorithm: str,
+        after_generation: Optional[GenerationCallback] = None
+    ) -> None:
         """Generate maze using an algorithm
 
         Args:
@@ -266,6 +273,8 @@ class Maze:
                 self.generator.basic_weight_maze()
             case "Basic Random Maze":
                 self.generator.basic_random_maze()
+
+        self.animator.nodes_to_animate[-1].after_animation = after_generation
 
     def _draw_walls_around(self) -> None:
         """Draw walls around the maze
@@ -398,6 +407,7 @@ class Maze:
         self.animator.add_nodes_to_animate(nodes, gap=gap)
 
         if not solution.path:
+            self.animator.nodes_to_animate[-1].after_animation = after_animation
             return
 
         # Color the shortest path in yellowd

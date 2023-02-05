@@ -1,9 +1,14 @@
 import random
-from typing import Any
+from typing import Any, Protocol
 import pygame
 
 from .animations import AnimatingNode, Animation, Animator
 from .constants import DARK, GREEN_2, PURPLE, WHITE
+
+
+class GenerationCallback(Protocol):
+    def __call__(self) -> None:
+        return
 
 
 class MazeGenerator:
