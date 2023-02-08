@@ -1,6 +1,8 @@
 # Pathfinding Visualizer
 A pathfinding visualizer made in Python and Pygame. This project aims to provide a fun and interactive way to learn about popular pathfinding algorithms such as Dijkstra's, A* and other [supported algorithms](#supported-algorithms).
 
+https://user-images.githubusercontent.com/67793598/216833587-ccc9e881-c951-4109-9e0f-123dfd98795e.mp4
+
 ## Screenshots
 <table border='0px'>
     <tr>
@@ -32,6 +34,7 @@ A pathfinding visualizer made in Python and Pygame. This project aims to provide
 ## Features
 * Visualizes popular pathfinding algorithms such as Dijkstra's and A*.
 * Visualizes popular maze generation algorithms like Recursive division and Prim's algorithm.
+* Feature to run all algorithms b2b to compare their performance.
 * Step-by-step animation of the search process, allowing you to see how the algorithms work.
 * Option to place obstacles on the grid to create custom maps.
 * Selectable starting and ending points on the grid.
