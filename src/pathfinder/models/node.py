@@ -15,9 +15,13 @@ class Node:
         self.cost = cost
         self.parent = parent
         self.action = action
-    
+        self.estimated_distance = float("inf")
+
     def __lt__(self, other: Node) -> bool:
-        return self.state < other.state
+        if self.estimated_distance == float("inf"):
+            return self.state < other.state
+        
+        return self.estimated_distance < other.estimated_distance
 
     def __repr__(self) -> str:
         return f"Node({self.state!r}, Node(...), {self.action!r})"

@@ -35,15 +35,19 @@ class AStarSearch:
         g_score = {grid.start: 0}
         f_score = {grid.start: AStarSearch.heuristic(grid.start, grid.end)}
 
+        # Keep track of explored nodes
+        explored = []
+
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
                 return NoSolution(
-                    [], list(g_score), (time.time() - start_time) * 1000
+                    [], explored, (time.time() - start_time) * 1000
                 )
 
             # Remove node from the frontier
             node = frontier.pop()
+            explored.append(node.state)
 
             # If reached destination point
             if node.state == grid.end:
@@ -60,8 +64,9 @@ class AStarSearch:
                 cells.reverse()
 
                 return Solution(
-                    cells, list(g_score), (time.time() - start_time) * 1000
+                    cells, explored, (time.time() - start_time) * 1000
                 )
+
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():
@@ -74,6 +79,7 @@ class AStarSearch:
 
                     n = grid.get_node(pos=state)
                     n.parent = node
+                    n.estimated_distance = f_score[state] - cost
 
                     if not n.action:
                         n.action = action

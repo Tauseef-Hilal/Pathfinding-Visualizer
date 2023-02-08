@@ -34,15 +34,18 @@ class GreedyBestFirstSearch:
         # Keep track of G scores
         cost_so_far = {grid.start: 0}
 
+        explored = []
+
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
                 return NoSolution(
-                    [], list(cost_so_far), (time.time() - start_time) * 1000
+                    [], explored, (time.time() - start_time) * 1000
                 )
 
             # Remove node from the frontier
             node = frontier.pop()
+            explored.append(node.state)
 
             # If reached destination point
             if node.state == grid.end:
@@ -59,7 +62,7 @@ class GreedyBestFirstSearch:
                 cells.reverse()
 
                 return Solution(
-                    cells, list(cost_so_far), (time.time() - start_time) * 1000
+                    cells, explored, (time.time() - start_time) * 1000
                 )
 
             # Determine possible actions
@@ -71,6 +74,10 @@ class GreedyBestFirstSearch:
 
                     n = grid.get_node(pos=state)
                     n.parent = node
+                    n.estimated_distance = GreedyBestFirstSearch.heuristic(
+                        state,
+                        grid.end
+                    )
 
                     if not n.action:
                         n.action = action

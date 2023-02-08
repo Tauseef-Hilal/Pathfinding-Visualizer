@@ -12,7 +12,7 @@ from ..models.solution import NoSolution, Solution
 
 class DijkstrasSearch:
     @staticmethod
-    def search(grid: Grid, callback: Optional[Visualiser] = None) -> Solution:
+    def search(grid: Grid) -> Solution:
         """Find path between two points in a grid using A* Search
 
         Args:
@@ -35,15 +35,18 @@ class DijkstrasSearch:
         # Keep track of G scores
         distance = {grid.start: 0}
 
+        explored = []
+
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
                 return NoSolution(
-                    [], list(distance), (time.time() - start_time) * 1000
+                    [], explored, (time.time() - start_time) * 1000
                 )
 
             # Remove node from the frontier
             node = frontier.pop()
+            explored.append(node.state)
 
             # If reached destination point
             if node.state == grid.end:
@@ -60,12 +63,8 @@ class DijkstrasSearch:
                 cells.reverse()
 
                 return Solution(
-                    cells, list(distance), (time.time() - start_time) * 1000
+                    cells, explored, (time.time() - start_time) * 1000
                 )
-
-            # Call the visualiser function, if provided
-            if node.parent and callback:
-                callback(node.state, delay=True)
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():
