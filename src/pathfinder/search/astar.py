@@ -47,7 +47,9 @@ class AStarSearch:
 
             # Remove node from the frontier
             node = frontier.pop()
-            explored.append(node.state)
+            if node not in explored:
+                explored.append(node.state)
+
 
             # If reached destination point
             if node.state == grid.end:

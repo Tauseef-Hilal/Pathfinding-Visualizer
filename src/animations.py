@@ -219,36 +219,36 @@ class Animator:
         # Part 2 - Purple circle
         elif node.progress < 0.60 * node.duration:
             progress = node.progress - 0.05 * node.duration
-            duration = 0.50 * node.duration
+            duration = node.duration - 0.05 * node.duration
             size = self._easeOutExpo(
                 progress,
                 1, 33 - 1, duration
             )
 
-            if size < 32.8:
+            if size < 30:
                 color = node.colors[1]
             else:
                 color = node.colors[2]
 
-            border_radius = int(0.50 * size) if size < 30 else int(0.10 * size)
+            border_radius = int(0.40 * size) if size < 28 else int(0.10 * size)
 
         # Part 3 - Green - Blue rect
         elif node.progress < node.duration:
             progress = node.progress - 0.60 * node.duration
             duration = 0.40 * node.duration
 
-            if progress < duration * 0.20:
+            if progress < duration * 0.05:
                 color = node.colors[2]
                 size = self._easeOutExpo(
                     progress,
-                    33, 36 - 33, duration * 0.20
+                    33, 36 - 33, duration * 0.05
                 )
                 border_radius = int(0.10 * 30)
             else:
                 color = node.colors[-1]
                 size = self._easeOutExpo(
-                    progress - duration * 0.20,
-                    36, 30 - 36, duration * 0.80
+                    progress - duration * 0.05,
+                    36, 30 - 36, duration * 0.95
                 )
         else:
             size = 30

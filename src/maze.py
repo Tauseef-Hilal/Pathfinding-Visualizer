@@ -396,13 +396,13 @@ class Maze:
 
         match self.speed:
             case "Fast":
-                gap = 10
+                gap = 5
             case "Medium":
                 gap = 60
             case "Slow":
                 gap = 1000
             case _:
-                gap = 10
+                gap = 5
 
         self.animator.add_nodes_to_animate(nodes, gap=gap)
 
@@ -425,7 +425,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes, delay=1500, gap=30)
+        self.animator.add_nodes_to_animate(nodes, delay=1800, gap=20)
         self.animator.nodes_to_animate[-1].after_animation = after_animation
 
     def _draw_rect(
