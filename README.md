@@ -57,7 +57,10 @@ Each algorithm uses a different approach to finding the shortest path between tw
 * Pygame: You can install Pygame by running 'pip install pygame' in your terminal.
 
 ## Usage
-Download the project repository to your local machine. Navigate to the project directory. Run 'python main.py' in your terminal to start the program.
+- Download the project repository to your local machine. 
+- Navigate to the project directory.
+- Run `python3 run.pyw` if on Linux or Mac
+- Run `python run.pyw` if on Windows
 
 ## Contributing
 This project is open to contributions, bug reports, and suggestions. If you've found a bug or have a suggestion, please open an issue.
