@@ -190,11 +190,17 @@ class Maze:
     def clear_visited(self) -> None:
         """Clear visited nodes
         """
-        for i in range(self.height):
-            for j in range(self.width):
-                node = self.maze[i][j]
-                if node.value in ("V", "*"):
-                    self.set_cell((i, j), str(node.cost))
+        for rowIdx in range(self.height):
+            for colIdx in range(self.width):
+                node = self.maze[rowIdx][colIdx]
+                self.maze[rowIdx][colIdx] = MazeNode(
+                    str(node.cost) if node.value in ("V", "*") else node.value,
+                    (rowIdx, colIdx),
+                    node.cost
+                )
+
+                self.set_cell((rowIdx, colIdx),
+                              self.maze[rowIdx][colIdx].value)
 
         self.set_cell(self.start, "A", forced=True)
         self.set_cell(self.goal, "B", forced=True)
