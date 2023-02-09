@@ -11,7 +11,9 @@ from .pathfinder.models.grid import Grid
 from .pathfinder.models.search_types import Search
 
 from .constants import (
+    DARK_BLUE_2,
     GOAL,
+    PURPLE,
     START,
     WEIGHT,
     CELL_SIZE,
@@ -21,7 +23,7 @@ from .constants import (
     MAZE_HEIGHT,
     HEADER_HEIGHT,
     MAZE_WIDTH,
-    PURPLE,
+    BLUE_2,
     WIDTH,
     BLUE,
     DARK,
@@ -388,8 +390,8 @@ class Maze:
                     ticks=pygame.time.get_ticks(),
                     value="V",
                     color=WHITE,
-                    colors=[YELLOW, PURPLE, GREEN_2, BLUE],
-                    duration=2000,
+                    colors=[YELLOW, PURPLE, BLUE_2, GREEN_2, BLUE],
+                    duration=1500,
                     animation=Animation.PATH_ANIMATION
                 )
             )
@@ -398,7 +400,7 @@ class Maze:
             case "Fast":
                 gap = 5
             case "Medium":
-                gap = 60
+                gap = 40
             case "Slow":
                 gap = 1000
             case _:
@@ -425,7 +427,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes, delay=1800, gap=20)
+        self.animator.add_nodes_to_animate(nodes, delay=1500, gap=10)
         self.animator.nodes_to_animate[-1].after_animation = after_animation
 
     def _draw_rect(

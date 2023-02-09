@@ -160,11 +160,11 @@ class Animator:
 
         # Calculate size as per ease-out func
         if node.progress < node.duration / 2:
-            size = self._easeOutExpo(
+            size = self._ease_out_sine(
                 node.progress, 9, 36 - 9, node.duration / 2
             )
         else:
-            size = self._easeOutExpo(
+            size = self._ease_out_sine(
                 node.progress - node.duration / 2,
                 36, 30 - 36, node.duration / 2
             )
@@ -185,12 +185,12 @@ class Animator:
 
         # Calculate size as per ease-out func
         if node.progress < node.duration / 2:
-            size = self._easeOutExpo(
+            size = self._ease_out_sine(
                 node.progress, 9, 36 - 9, node.duration / 2
             )
 
         else:
-            size = self._easeOutExpo(
+            size = self._ease_out_sine(
                 node.progress - node.duration / 2,
                 36, 30 - 36, node.duration / 2
             )
@@ -210,49 +210,77 @@ class Animator:
             node (AnimatingNode): Node in solution path
         """
         border_radius = 0
-
-        # Part 1 - Yellow rectangle
-        if node.progress < 0.05 * node.duration:
+        if node.progress < 0.02 * node.duration:
             size = node.rect.width
-            color = node.colors[0]
-
-        # Part 2 - Purple circle
-        elif node.progress < 0.60 * node.duration:
-            progress = node.progress - 0.05 * node.duration
-            duration = node.duration - 0.05 * node.duration
-            size = self._easeOutExpo(
-                progress,
-                1, 33 - 1, duration
+        elif node.progress < 0.75 * node.duration:
+            duration = 0.75 * node.duration
+            size = self._ease_out_sine(
+                node.progress, 9, 36 - 9, duration
             )
 
-            if size < 30:
-                color = node.colors[1]
-            else:
-                color = node.colors[2]
+            border_radius = int(0.40 * size)
+            if size > 30:
+                border_radius = int(0.12 * size)
 
-            border_radius = int(0.40 * size) if size < 28 else int(0.10 * size)
-
-        # Part 3 - Green - Blue rect
-        elif node.progress < node.duration:
-            progress = node.progress - 0.60 * node.duration
-            duration = 0.40 * node.duration
-
-            if progress < duration * 0.05:
-                color = node.colors[2]
-                size = self._easeOutExpo(
-                    progress,
-                    33, 36 - 33, duration * 0.05
-                )
-                border_radius = int(0.10 * 30)
-            else:
-                color = node.colors[-1]
-                size = self._easeOutExpo(
-                    progress - duration * 0.05,
-                    36, 30 - 36, duration * 0.95
-                )
         else:
-            size = 30
-            color = node.colors[-1]
+            duration = 0.25 * node.duration
+            progress = node.progress - 0.75 * node.duration
+            size = self._ease_out_sine(
+                progress,
+                36, 30 - 36, duration
+            )
+            border_radius = 0
+
+        if node.progress < 0.02 * node.duration:
+            color = node.colors[0]
+        elif node.progress < 0.50 * node.duration:
+            progress = node.progress
+            duration = 0.50 * node.duration
+            r, g, b = node.colors[1]
+            r2, g2, b2 = node.colors[2]
+
+            r = self._ease_out_sine(
+                progress, r, r2 - r, duration
+            )
+            g = self._ease_out_sine(
+                progress, g, g2 - g, duration
+            )
+            b = self._ease_out_sine(
+                progress, b, b2 - b, duration
+            )
+            color = (round(r), round(g), round(b))
+        elif node.progress < 0.75 * node.duration:
+            progress = node.progress - 0.50 * node.duration
+            duration = 0.25 * node.duration
+            r, g, b = node.colors[2]
+            r2, g2, b2 = node.colors[3]
+
+            r = self._ease_out_sine(
+                progress, r, r2 - r, duration
+            )
+            g = self._ease_out_sine(
+                progress, g, g2 - g, duration
+            )
+            b = self._ease_out_sine(
+                progress, b, b2 - b, duration
+            )
+            color = (round(r), round(g), round(b))
+        else:
+            progress = node.progress - 0.75 * node.duration
+            duration = 0.25 * node.duration
+            r, g, b = node.colors[3]
+            r2, g2, b2 = node.colors[-1]
+
+            r = self._ease_out_sine(
+                progress, r, r2 - r, duration
+            )
+            g = self._ease_out_sine(
+                progress, g, g2 - g, duration
+            )
+            b = self._ease_out_sine(
+                progress, b, b2 - b, duration
+            )
+            color = (round(r), round(g), round(b))
 
         # Update size
         node.rect.width = node.rect.height = int(size)
@@ -262,16 +290,16 @@ class Animator:
         pygame.draw.rect(self.surface, color, node.rect,
                          border_radius=border_radius)
 
-        if color != node.colors[1]:
+        if node.progress > 0.50 * node.duration:
             pygame.draw.rect(
                 self.surface,
-                GREEN if color == GREEN_2 else GRAY,
+                GREEN if node.progress < 0.75 * node.duration else GRAY,
                 node.rect,
                 border_radius=border_radius,
                 width=1
             )
 
-    def _easeOutExpo(
+    def _ease_out_sine(
         self,
         time: float,
         starting_value: float,
@@ -289,7 +317,7 @@ class Animator:
         Returns:
             float: Current value
         """
-        return change_in_value * (-math.pow(2, -10 * time / duration) + 1) \
+        return change_in_value * math.sin(time / duration * (math.pi / 2)) \
             + starting_value
 
     def __repr__(self) -> str:

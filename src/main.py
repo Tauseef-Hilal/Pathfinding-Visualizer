@@ -20,7 +20,7 @@ from .constants import (
     GREEN,
     GREEN_2,
     HEADER_HEIGHT,
-    PURPLE,
+    BLUE_2,
     WHITE,
     WIDTH,
     HEIGHT,
@@ -310,7 +310,7 @@ def main() -> None:
         x=speed_btn.rect.x,
         y=speed_btn.rect.bottom,
         foreground_color=pygame.Color(*WHITE),
-        background_color=pygame.Color(*PURPLE),
+        background_color=pygame.Color(*BLUE_2),
     )
     state.speed_label.rect.centerx = speed_btn.rect.centerx
 
@@ -583,7 +583,7 @@ def draw() -> None:
                 x=speed_btn.rect.x,
                 y=speed_btn.rect.bottom,
                 foreground_color=pygame.Color(*WHITE),
-                background_color=pygame.Color(*PURPLE),
+                background_color=pygame.Color(*BLUE_2),
             )
             state.speed_label.rect.centerx = speed_btn.rect.centerx
             maze.set_speed(speed_menu.selected.text)

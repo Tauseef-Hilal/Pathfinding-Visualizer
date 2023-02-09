@@ -3,7 +3,7 @@ from typing import Any, Protocol
 import pygame
 
 from .animations import AnimatingNode, Animation, Animator
-from .constants import DARK, GREEN_2, PURPLE, WHITE
+from .constants import DARK, GREEN_2, BLUE_2, WHITE
 
 
 class GenerationCallback(Protocol):
@@ -120,7 +120,7 @@ class MazeGenerator:
                         center=(x + 15, y + 15),
                         value="1",
                         ticks=pygame.time.get_ticks(),
-                        color=PURPLE
+                        color=BLUE_2
                     )
                 )
 
@@ -185,7 +185,7 @@ class MazeGenerator:
                         center=(x + 15, y + 15),
                         value="1",
                         ticks=pygame.time.get_ticks(),
-                        color=PURPLE
+                        color=BLUE_2
                     )
                 )
 
