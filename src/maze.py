@@ -13,7 +13,7 @@ from .pathfinder.models.search_types import Search
 from .constants import (
     DARK_BLUE_2,
     GOAL,
-    PURPLE,
+    HEIGHT,
     START,
     WEIGHT,
     CELL_SIZE,
@@ -215,10 +215,13 @@ class Maze:
             bool: Whether mouse is within the maze
         """
         return all((
-            pos[1] > HEADER_HEIGHT,
-            pos[1] < 890,
             pos[0] > CELL_SIZE // 2,
-            pos[0] < WIDTH - CELL_SIZE // 2
+            pos[0] < WIDTH -
+            (WIDTH - (self.width * CELL_SIZE) - CELL_SIZE // 2),
+
+            pos[1] > HEADER_HEIGHT,
+            pos[1] < HEIGHT -
+            (HEIGHT - (self.height * CELL_SIZE) - HEADER_HEIGHT)
         ))
 
     def get_cell_pos(self, pos: tuple[int, int]) -> tuple[int, int]:

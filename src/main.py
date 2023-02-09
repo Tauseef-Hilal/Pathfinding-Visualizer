@@ -1,15 +1,23 @@
 import sys
 import pygame
 
-from src.state import State
-
-
+from .state import State
 from .generate import MazeGenerator
 from .animations import Animation, Animator, AnimatingNode
 from .maze import GOAL, START, Maze, WEIGHT
-from .widgets import Alignment, Button, Label, Menu, Orientation, Popup, Table, TableCell
+
+from .widgets import (
+    Alignment,
+    Button,
+    Label,
+    Menu,
+    Orientation,
+    Popup,
+    Table,
+    TableCell
+)
+
 from .constants import (
-    BLACK,
     BLUE,
     CELL_SIZE,
     CLOCK,
@@ -32,7 +40,7 @@ from .constants import (
 pygame.init()
 
 # Set up window
-surface = WINDOW = pygame.display.set_mode((WIDTH, HEIGHT), pygame.HWACCEL)
+WINDOW = pygame.display.set_mode((WIDTH, HEIGHT), pygame.HWACCEL)
 pygame.display.set_caption("Pathfinding Visualiser")
 
 # Top bar

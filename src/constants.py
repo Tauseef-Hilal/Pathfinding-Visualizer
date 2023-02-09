@@ -1,5 +1,6 @@
 import pygame
 pygame.font.init()
+pygame.display.init()
 
 # Colors
 BLACK = (0, 0, 0)
@@ -16,7 +17,8 @@ DARK_BLUE_2 = (44, 67, 208)
 PURPLE = (17, 104, 217)
 
 # Window Dimensions
-WIDTH, HEIGHT = 1230, 900
+WINDOW_INFO = pygame.display.Info()
+WIDTH, HEIGHT = 1230, WINDOW_INFO.current_h - 150
 HEADER_HEIGHT = 200
 
 # Maze
