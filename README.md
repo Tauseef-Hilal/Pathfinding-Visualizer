@@ -1,7 +1,7 @@
 # Pathfinding Visualizer
 A pathfinding visualizer made in Python and Pygame. This project aims to provide a fun and interactive way to learn about popular pathfinding algorithms such as Dijkstra's, A* and other [supported algorithms](#supported-algorithms).
 
-https://user-images.githubusercontent.com/67793598/216833587-ccc9e881-c951-4109-9e0f-123dfd98795e.mp4
+https://user-images.githubusercontent.com/67793598/217870831-f3086025-cad3-4d74-bf9a-24837662c051.mp4
 
 ## Screenshots
 <table border='0px'>
