@@ -14,6 +14,8 @@ from .constants import (
     DARK_BLUE_2,
     GOAL,
     HEIGHT,
+    REMAINDER_H,
+    REMAINDER_W,
     START,
     WEIGHT,
     CELL_SIZE,
@@ -90,7 +92,7 @@ class Maze:
             for j in range(self.width):
 
                 # Calculate coordinates for the cell
-                x = j * CELL_SIZE + (CELL_SIZE // 2)
+                x = j * CELL_SIZE + (REMAINDER_W // 2)
                 y = i * CELL_SIZE + HEADER_HEIGHT
 
                 row.append((x, y))
@@ -216,12 +218,10 @@ class Maze:
         """
         return all((
             pos[0] > CELL_SIZE // 2,
-            pos[0] < WIDTH -
-            (WIDTH - (self.width * CELL_SIZE) - CELL_SIZE // 2),
+            pos[0] < WIDTH - REMAINDER_W // 2,
 
             pos[1] > HEADER_HEIGHT,
-            pos[1] < HEIGHT -
-            (HEIGHT - (self.height * CELL_SIZE) - HEADER_HEIGHT)
+            pos[1] < HEIGHT - REMAINDER_H
         ))
 
     def get_cell_pos(self, pos: tuple[int, int]) -> tuple[int, int]:
@@ -236,7 +236,7 @@ class Maze:
         x, y = pos
 
         return ((y - HEADER_HEIGHT) // CELL_SIZE,
-                (x - CELL_SIZE // 2) // CELL_SIZE)
+                (x - REMAINDER_W // 2) // CELL_SIZE)
 
     def draw(self) -> None:
         """Draw maze"""
