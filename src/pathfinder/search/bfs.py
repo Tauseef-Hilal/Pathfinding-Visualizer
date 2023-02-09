@@ -44,6 +44,9 @@ class BreadthFirstSearch:
             # Remove node from the frontier
             node = frontier.remove()
 
+            # Add current node position into the explored set
+            explored_states[node.state] = True
+
             # If reached destination point
             if node.state == grid.end:
 
@@ -63,9 +66,6 @@ class BreadthFirstSearch:
                     cells, list(explored_states),
                     (time.time() - start_time) * 1000
                 )
-
-            # Add current node position into the explored set
-            explored_states[node.state] = True
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():

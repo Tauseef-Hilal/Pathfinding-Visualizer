@@ -37,12 +37,15 @@ class DepthFirstSearch:
             # Return empty Solution object for no solution
             if frontier.is_empty():
                 return NoSolution(
-                    [], list(explored_states), 
+                    [], list(explored_states),
                     (time.time() - start_time) * 1000
                 )
 
             # Remove node from the frontier
             node = frontier.remove()
+
+            # Add current node position the explored set
+            explored_states[node.state] = True
 
             # If reached destination point
             if node.state == grid.end:
@@ -59,12 +62,9 @@ class DepthFirstSearch:
                 cells.reverse()
 
                 return Solution(
-                    cells, list(explored_states), 
+                    cells, list(explored_states),
                     (time.time() - start_time) * 1000
                 )
-
-            # Add current node position the explored set
-            explored_states[node.state] = True
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():

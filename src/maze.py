@@ -390,7 +390,7 @@ class Maze:
                     ticks=pygame.time.get_ticks(),
                     value="V",
                     color=WHITE,
-                    colors=[YELLOW, PURPLE, BLUE_2, GREEN_2, BLUE],
+                    colors=[YELLOW, DARK_BLUE_2, BLUE_2, GREEN_2, BLUE],
                     duration=1500,
                     animation=Animation.PATH_ANIMATION
                 )

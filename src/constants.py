@@ -12,7 +12,7 @@ YELLOW = (255, 254, 106)
 GRAY = (166, 222, 255)
 DARK_BLUE = (52, 73, 94)
 BLUE_2 = (81, 145, 228)
-DARK_BLUE_2 = (0, 0, 66)
+DARK_BLUE_2 = (44, 67, 208)
 PURPLE = (17, 104, 217)
 
 # Window Dimensions
