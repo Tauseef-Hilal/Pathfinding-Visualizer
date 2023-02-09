@@ -53,7 +53,7 @@ The following pathfinding algorithms are currently supported in this visualizer:
 Each algorithm uses a different approach to finding the shortest path between two points on a graph. Choose the one that best fits your use case and watch it in action.
 
 ## Requirements
-* Python 3.x: You can download the latest version of Python from the official website (https://www.python.org/downloads/).
+* Python 3.10 and above: You can download the latest version of Python from the official website (https://www.python.org/downloads/).
 * Pygame: You can install Pygame by running 'pip install pygame' in your terminal.
 
 ## Usage
