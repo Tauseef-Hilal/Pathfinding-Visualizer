@@ -29,6 +29,7 @@ from .constants import (
     GREEN_2,
     HEADER_HEIGHT,
     BLUE_2,
+    PURPLE,
     WHITE,
     WIDTH,
     HEIGHT,
@@ -341,6 +342,9 @@ def main() -> None:
                 sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if state.overlay:
+                    break
+
                 state.need_update = True
                 pos = pygame.mouse.get_pos()
 
@@ -436,9 +440,9 @@ def main() -> None:
         if dragging and not state.done_visualising and not animator.animating:
             x, y = pygame.mouse.get_pos()
             if cell_value == "A":
-                surface = WINDOW.blit(START, (x - 10, y - 10))
+                WINDOW.blit(START, (x - 10, y - 10))
             else:
-                surface = WINDOW.blit(GOAL, (x - 10, y - 10))
+                WINDOW.blit(GOAL, (x - 10, y - 10))
 
         # Instantly find path if dragging post visualisation
         if dragging and state.done_visualising and not animator.animating:
@@ -512,7 +516,7 @@ def draw() -> None:
     """Draw things (except Visualise button)
     """
     # Fill white, draw top background and title text
-    surface = WINDOW.fill(WHITE)
+    WINDOW.fill(WHITE)
     pygame.draw.rect(WINDOW, DARK_BLUE, top)
     title.draw()
 
@@ -539,7 +543,7 @@ def draw() -> None:
         text_rect = text_surf.get_rect()
         text_rect.centery = y + CELL_SIZE // 2
 
-        surface = WINDOW.blit(text_surf, (x + CELL_SIZE + 10, text_rect.y))
+        WINDOW.blit(text_surf, (x + CELL_SIZE + 10, text_rect.y))
 
         # Formating
         if texts[text] == DARK:
@@ -549,14 +553,14 @@ def draw() -> None:
 
         # Draw images for weighted, start and target node
         if text == "Weighted Node":
-            surface = WINDOW.blit(WEIGHT, (x + 3, y + 3))
+            WINDOW.blit(WEIGHT, (x + 3, y + 3))
             x = 60
         elif text == "Start Node":
             image_rect = START.get_rect(center=(75, top.bottom + 35))
-            surface = WINDOW.blit(START, image_rect)
+            WINDOW.blit(START, image_rect)
         elif text == "Target Node":
             image_rect = GOAL.get_rect(center=(75, y + 15))
-            surface = WINDOW.blit(GOAL, image_rect)
+            WINDOW.blit(GOAL, image_rect)
 
     # Draw algo label
     state.label.draw()
@@ -567,6 +571,7 @@ def draw() -> None:
     # Handle buttons
     if (algo_menu.draw() or algo_menu.clicked) \
             and not maze.animator.animating:
+        state.overlay = True
         if algo_menu.selected:
             state.label = Label(
                 algo_menu.selected.text, "center", 0,
@@ -581,8 +586,12 @@ def draw() -> None:
                 text = state.label.text.split(" takes")[0]
                 instant_algorithm(maze, text)
 
+            state.overlay = False
+
     if (speed_menu.draw() or speed_menu.clicked) \
             and not maze.animator.animating:
+        state.overlay = True
+
         if speed_menu.selected:
             state.speed_label = Label(
                 surface=WINDOW,
@@ -595,10 +604,13 @@ def draw() -> None:
             )
             state.speed_label.rect.centerx = speed_btn.rect.centerx
             maze.set_speed(speed_menu.selected.text)
+            state.overlay = False
 
     if visualise_btn.draw() \
         and not state.label.text.startswith("Choose") \
             and not maze.animator.animating:
+        state.overlay = True
+
         text = state.label.text.split(" took")[0]
         text = text.split("Running ")[-1]
         idx = [algo_menu.children.index(btn)
@@ -612,6 +624,8 @@ def draw() -> None:
 
     if (comapre_menu.draw() or comapre_menu.clicked) \
             and not animator.animating:
+        state.overlay = True
+
         if comapre_menu.selected \
                 and comapre_menu.selected.text == "Current Maze":
             state.results = {}
@@ -624,12 +638,14 @@ def draw() -> None:
 
     if (generate_menu.draw() or generate_menu.clicked) \
             and not animator.animating:
+        state.overlay = True
+
         if generate_menu.selected:
             maze.clear_board()
             text = state.label.text
 
             def callback():
-
+                state.overlay = False
                 state.label = Label(
                     f"{text}", "center", 0,
                     background_color=pygame.Color(*WHITE),
@@ -662,6 +678,12 @@ def draw() -> None:
             )
             state.label.rect.bottom = HEADER_HEIGHT - 10
 
+    if state.results_popup:
+        state.overlay = True
+        if state.results_popup.draw():
+            state.results_popup = None
+            state.overlay = False
+
 
 def run_single(idx: int) -> None:
     """Run a single algorithm on one maze
@@ -671,12 +693,12 @@ def run_single(idx: int) -> None:
     """
     maze.clear_visited()
     text = algo_menu.children[idx].text
+    solution = maze.solve(text)
 
     def callback():
         state.done_visualising = True
-        solution = maze.solve(text)
         state.label = Label(
-            f"{text} took {len(solution.explored)} steps in "
+            f"{text} took {solution.explored_length} steps in "
             f"{solution.time:.2f}ms", "center", 0,
             background_color=pygame.Color(*WHITE),
             foreground_color=pygame.Color(*DARK),
@@ -684,8 +706,8 @@ def run_single(idx: int) -> None:
             surface=WINDOW,
         )
         state.label.rect.bottom = HEADER_HEIGHT - 10
+        state.overlay = False
 
-    solution = maze.solve(text)
     maze.visualize(solution=solution, after_animation=callback)
 
     state.label = Label(
@@ -754,22 +776,26 @@ def run_all(algo_idx: int, maze_idx: int = -1) -> None:
 
             if state.run_all_mazes:
                 for result in results:
-                    result[1]["explored"] //= maze_idx + 2
+                    result[1]["path_length"] //= maze_idx + 2
+                    result[1]["path_cost"] //= maze_idx + 2
+                    result[1]["explored_length"] //= maze_idx + 2
                     result[1]["time"] /= maze_idx + 2
 
             results.sort(key=lambda item: item[1]["time"])
 
             show_results(results)
-            state.need_update = False
             state.run_all_mazes = False
+            state.overlay = False
 
     solution = maze.solve(text)
 
     if text not in state.results:
-        state.results[text] = {"explored": 0, "time": 0}
-
-    state.results[text]["explored"] += len(solution.explored)
-    state.results[text]["time"] += solution.time
+        state.results[text] = vars(solution)
+    else:
+        state.results[text]["explored_length"] += solution.explored_length
+        state.results[text]["path_length"] += solution.path_length
+        state.results[text]["path_cost"] += solution.path_cost
+        state.results[text]["time"] += solution.time
 
     maze.visualize(solution=solution, after_animation=callback)
 
@@ -813,6 +839,26 @@ def show_results(results: list[tuple[str, dict[str, float]]]) -> None:
         ),
         TableCell(
             child=Label(
+                "Path Length", 0, 0,
+                background_color=pygame.Color(*DARK_BLUE),
+                foreground_color=pygame.Color(*WHITE),
+                padding=6, font_size=20, outline=False,
+                surface=WINDOW,
+            ),
+            color=DARK_BLUE,
+        ),
+        TableCell(
+            child=Label(
+                "Path Cost", 0, 0,
+                background_color=pygame.Color(*DARK_BLUE),
+                foreground_color=pygame.Color(*WHITE),
+                padding=6, font_size=20, outline=False,
+                surface=WINDOW,
+            ),
+            color=DARK_BLUE,
+        ),
+        TableCell(
+            child=Label(
                 "Time Taken", 0, 0,
                 background_color=pygame.Color(*DARK_BLUE),
                 foreground_color=pygame.Color(*WHITE),
@@ -841,7 +887,7 @@ def show_results(results: list[tuple[str, dict[str, float]]]) -> None:
             ),
             TableCell(
                 child=Label(
-                    f"{result[1]['explored']}", 0, 0,
+                    f"{result[1]['explored_length']}", 0, 0,
                     background_color=pygame.Color(*colors[i]),
                     foreground_color=pygame.Color(*DARK),
                     padding=6, font_size=20, outline=False,
@@ -852,7 +898,29 @@ def show_results(results: list[tuple[str, dict[str, float]]]) -> None:
             ),
             TableCell(
                 child=Label(
-                    f"{result[1]['time']:.2f}", 0, 0,
+                    f"{result[1]['path_length']}", 0, 0,
+                    background_color=pygame.Color(*colors[i]),
+                    foreground_color=pygame.Color(*DARK),
+                    padding=6, font_size=20, outline=False,
+                    surface=WINDOW,
+                ),
+                color=colors[i],
+                align=Alignment.RIGHT
+            ),
+            TableCell(
+                child=Label(
+                    f"{result[1]['path_cost']}", 0, 0,
+                    background_color=pygame.Color(*colors[i]),
+                    foreground_color=pygame.Color(*DARK),
+                    padding=6, font_size=20, outline=False,
+                    surface=WINDOW,
+                ),
+                color=colors[i],
+                align=Alignment.RIGHT
+            ),
+            TableCell(
+                child=Label(
+                    f"{result[1]['time']:.2f}ms", 0, 0,
                     background_color=pygame.Color(*colors[i]),
                     foreground_color=pygame.Color(*DARK),
                     padding=6, font_size=20, outline=False,
@@ -884,7 +952,7 @@ def show_results(results: list[tuple[str, dict[str, float]]]) -> None:
                 x=0,
                 y=0,
                 rows=6,
-                columns=3,
+                columns=5,
                 padding=20,
                 color=DARK,
                 children=children,
@@ -892,8 +960,6 @@ def show_results(results: list[tuple[str, dict[str, float]]]) -> None:
         ],
     )
 
-    popup.rect.center = WINDOW.get_rect().center
-
-    maze.clear_board()
-    draw()
-    popup.draw()
+    popup.update_center(WINDOW.get_rect().center)
+    popup.set_surface(WINDOW)
+    state.results_popup = popup

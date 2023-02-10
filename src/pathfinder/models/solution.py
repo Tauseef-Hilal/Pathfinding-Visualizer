@@ -5,10 +5,14 @@ class Solution:
         self,
         path: list[tuple[int, int]],
         explored: list[tuple[int, int]],
-        time: float
+        time: float = 0,
+        path_cost: int = 0
     ) -> None:
         self.path = path
+        self.path_cost = path_cost
+        self.path_length = len(path)
         self.explored = explored
+        self.explored_length = len(explored)
         self.time = time
 
     def __repr__(self) -> str:

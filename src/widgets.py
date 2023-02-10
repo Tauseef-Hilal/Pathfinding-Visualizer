@@ -5,7 +5,6 @@ import pygame
 from .constants import (
     BLACK,
     DARK_BLUE,
-    GREEN,
     WHITE,
     WIDTH,
     HEIGHT
@@ -180,8 +179,16 @@ class Menu(Widget):
             child.rect.x = self.x
             child.rect.top = prev.rect.bottom
 
+        self.rect = self.button.rect
+        self.popup_rect = pygame.Rect(self.x - 20,
+                                self.button.rect.bottom,
+                                self.width + 40,
+                                self.height + 20)
+        
+
     def set_surface(self, surf: pygame.surface.Surface) -> None:
         self.screen = surf
+        self.button.set_surface(surf)
 
     def draw(self) -> bool:
         """Draw the menu
@@ -208,10 +215,7 @@ class Menu(Widget):
         pygame.draw.rect(
             self.screen,
             DARK_BLUE,
-            (self.x - 20,
-                self.button.rect.bottom,
-                self.width + 40,
-                self.height + 20),
+            self.popup_rect,
             border_radius=10
         )
 
@@ -360,11 +364,11 @@ class Popup(Widget):
         self.height = height if height else 0
 
         if orientation == Orientation.HORIZONTAL:
-            content_width = sum(child.width for child in children)
-            content_height = max(child.height for child in children)
+            content_width = sum(child.rect.width for child in children)
+            content_height = max(child.rect.height for child in children)
         else:
-            content_width = max(child.width for child in children)
-            content_height = sum(child.height for child in children)
+            content_width = max(child.rect.width for child in children)
+            content_height = sum(child.rect.height for child in children)
 
         if self.width == 0:
             self.width = content_width
@@ -448,11 +452,30 @@ class Popup(Widget):
                 elif x_align != Alignment.NONE:
                     child.rect.left = prev.rect.left
 
+        self.close_btn = Button(
+            surface=self.surface,
+            text="   X   ",
+            x=0,
+            y=0,
+            background_color=pygame.Color(*DARK_BLUE),
+            foreground_color=pygame.Color(*WHITE),
+            font_size=20, outline=False
+        )
+        self.close_btn.rect.right = self.rect.right
+        self.close_btn.rect.top = self.rect.top
+
     def set_surface(self, surf: pygame.surface.Surface) -> None:
         self.screen = surf
+        self.close_btn.set_surface(surf)
 
-    def draw(self):
+    def update_center(self, center: tuple[int, int]):
+        self.rect.center = center
+        self.close_btn.rect.right = self.rect.right
+        self.close_btn.rect.top = self.rect.top
+
+    def draw(self) -> bool:
         for child in self.children:
             child.draw()
 
         self.screen.blit(self.surface, self.rect)
+        return self.close_btn.draw()

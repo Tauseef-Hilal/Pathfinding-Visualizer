@@ -1,5 +1,4 @@
 from __future__ import annotations
-import time
 
 from ..models.frontier import PriorityQueueFrontier
 from ..models.grid import Grid
@@ -19,8 +18,6 @@ class AStarSearch:
         Returns:
             Solution: Solution found
         """
-        start_time = time.time()
-
         # Create Node for the source cell
         node = grid.get_node(pos=grid.start)
 
@@ -41,34 +38,30 @@ class AStarSearch:
         while True:
             # Return empty Solution object for no solution
             if frontier.is_empty():
-                return NoSolution(
-                    [], explored, (time.time() - start_time) * 1000
-                )
+                return NoSolution([], explored)
 
             # Remove node from the frontier
             node = frontier.pop()
-            if node not in explored:
+            if node.state not in explored:
                 explored.append(node.state)
-
 
             # If reached destination point
             if node.state == grid.end:
 
                 # Generate path and return a Solution object
                 cells = []
+                path_cost = 0
 
                 temp = node
                 while temp.parent != None:
                     cells.append(temp.state)
+                    path_cost += temp.cost
                     temp = temp.parent
 
                 cells.append(grid.start)
                 cells.reverse()
 
-                return Solution(
-                    cells, explored, (time.time() - start_time) * 1000
-                )
-
+                return Solution(cells, explored, path_cost=path_cost)
 
             # Determine possible actions
             for action, state in grid.get_neighbours(node.state).items():

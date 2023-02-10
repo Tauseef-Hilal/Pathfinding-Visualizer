@@ -1,3 +1,5 @@
+import time
+import timeit
 from src.pathfinder.search.gbfs import GreedyBestFirstSearch
 from .search.astar import AStarSearch
 from .search.bfs import BreadthFirstSearch
@@ -24,4 +26,9 @@ class PathFinder:
             grid: Grid,
             search: Search,
     ) -> Solution:
-        return SEARCH[search](grid=grid)
+        start_time = time.perf_counter()
+        solution = SEARCH[search](grid=grid)
+        time_taken = (time.perf_counter() - start_time) * 1000
+        solution.time = time_taken
+
+        return solution

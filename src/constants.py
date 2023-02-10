@@ -18,7 +18,7 @@ PURPLE = (17, 104, 217)
 
 # Window Dimensions
 WINDOW_INFO = pygame.display.Info()
-WIDTH, HEIGHT = WINDOW_INFO.current_w - 400, WINDOW_INFO.current_h - 150
+WIDTH, HEIGHT = WINDOW_INFO.current_w - 450, WINDOW_INFO.current_h - 150
 HEADER_HEIGHT = 200
 
 # Maze

@@ -409,7 +409,7 @@ class Maze:
             case "Fast":
                 gap = 5
             case "Medium":
-                gap = 40
+                gap = 30
             case "Slow":
                 gap = 1000
             case _:
@@ -432,11 +432,11 @@ class Maze:
                     ticks=self.animator.nodes_to_animate[0].ticks,
                     value="*",
                     color=YELLOW,
-                    duration=300,
+                    duration=1000,
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes, delay=1500, gap=10)
+        self.animator.add_nodes_to_animate(nodes, delay=900, gap=20)
         self.animator.nodes_to_animate[-1].after_animation = after_animation
 
     def _draw_rect(

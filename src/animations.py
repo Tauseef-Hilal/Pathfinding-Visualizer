@@ -111,7 +111,7 @@ class Animator:
             node.ticks = pygame.time.get_ticks()
 
             if node.progress < 0:
-                continue
+                return
 
             # Call respective functions
             if node.animation == Animation.WALL_ANIMATION:
