@@ -7,8 +7,20 @@ https://user-images.githubusercontent.com/67793598/217888047-dae99911-c299-4d90-
 <table border='0px'>
     <tr>
         <td>
+            <img src='screenshots/AStar.png?raw=true' 
+                 alt="A* Search"
+                 width='360'>
+        </td>
+        <td>
             <img src='screenshots/Dijkstras.png?raw=true' 
                  alt="Dijkstra's Search"
+                 width='360'>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src='screenshots/GreedyBFS.png?raw=true' 
+                 alt="Greedy Best-First Search"
                  width='360'>
         </td>
         <td>
@@ -19,8 +31,8 @@ https://user-images.githubusercontent.com/67793598/217888047-dae99911-c299-4d90-
     </tr>
     <tr>
         <td>
-            <img src='screenshots/AStar.png?raw=true' 
-                 alt="A* Search"
+            <img src='screenshots/DFS.png?raw=true' 
+                 alt="Depth-First Search"
                  width='360'>
         </td>
         <td>

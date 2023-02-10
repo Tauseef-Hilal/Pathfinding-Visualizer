@@ -29,7 +29,6 @@ from .constants import (
     GREEN_2,
     HEADER_HEIGHT,
     BLUE_2,
-    PURPLE,
     WHITE,
     WIDTH,
     HEIGHT,
@@ -70,7 +69,7 @@ maze.generator = maze_generator
 algorithm_btn = Button(
     surface=WINDOW,
     text="Algorithms",
-    x=title.width + 50,
+    x=title.width + 70,
     y=0,
     background_color=pygame.Color(*DARK_BLUE),
     foreground_color=pygame.Color(*WHITE),
@@ -197,7 +196,7 @@ compare_btn = Button(
     surface=WINDOW,
 )
 compare_btn.rect.centery = top.centery
-compare_btn.rect.left = visualise_btn.rect.right + 40
+compare_btn.rect.left = visualise_btn.rect.right + 50
 
 comapre_menu = Menu(
     surface=WINDOW,
@@ -232,7 +231,7 @@ generate_btn = Button(
     surface=WINDOW,
 )
 generate_btn.rect.centery = top.centery
-generate_btn.rect.left = compare_btn.rect.right + 40
+generate_btn.rect.left = compare_btn.rect.right + 50
 
 
 generate_menu = Menu(
@@ -531,7 +530,7 @@ def draw() -> None:
         "Target Node": WHITE,
     }
 
-    x = 60
+    x = 50
     y = top.bottom + 20
     for text in texts:
         # Rectangle (Symbol)
@@ -549,17 +548,17 @@ def draw() -> None:
         if texts[text] == DARK:
             y += text_surf.get_height() + 30
         elif text != "Weighted Node":
-            x += CELL_SIZE + 10 + text_surf.get_width() + 60
+            x += CELL_SIZE + 10 + text_surf.get_width() + 75
 
         # Draw images for weighted, start and target node
         if text == "Weighted Node":
             WINDOW.blit(WEIGHT, (x + 3, y + 3))
-            x = 60
+            x = 50
         elif text == "Start Node":
-            image_rect = START.get_rect(center=(75, top.bottom + 35))
+            image_rect = START.get_rect(center=(65, top.bottom + 35))
             WINDOW.blit(START, image_rect)
         elif text == "Target Node":
-            image_rect = GOAL.get_rect(center=(75, y + 15))
+            image_rect = GOAL.get_rect(center=(65, y + 15))
             WINDOW.blit(GOAL, image_rect)
 
     # Draw algo label
