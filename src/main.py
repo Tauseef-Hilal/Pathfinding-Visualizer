@@ -403,7 +403,8 @@ def main() -> None:
                             animator.add_nodes_to_animate([
                                 AnimatingNode(
                                     rect=rect,
-                                    center=(x + 15, y + 15),
+                                    center=(x + CELL_SIZE // 2,
+                                            y + CELL_SIZE // 2),
                                     ticks=pygame.time.get_ticks(),
                                     value=str(key % 50 + 2),
                                     animation=Animation.WEIGHT_ANIMATION,
@@ -416,7 +417,8 @@ def main() -> None:
                             animator.add_nodes_to_animate([
                                 AnimatingNode(
                                     rect=rect,
-                                    center=(x + 15, y + 15),
+                                    center=(x + CELL_SIZE // 2,
+                                            y + CELL_SIZE // 2),
                                     ticks=pygame.time.get_ticks(),
                                     value="#",
                                     color=DARK

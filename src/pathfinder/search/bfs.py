@@ -1,7 +1,3 @@
-from typing import Optional
-
-from ..types import Visualiser
-from ..models.node import Node
 from ..models.grid import Grid
 from ..models.frontier import QueueFrontier
 from ..models.solution import NoSolution, Solution

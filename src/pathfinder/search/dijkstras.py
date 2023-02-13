@@ -1,10 +1,4 @@
-from __future__ import annotations
-from typing import Optional
-
-
-from ..types import Visualiser
 from ..models.frontier import PriorityQueueFrontier
-from ..models.node import Node, Node
 from ..models.grid import Grid
 from ..models.solution import NoSolution, Solution
 

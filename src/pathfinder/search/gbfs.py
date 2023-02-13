@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from ..models.frontier import PriorityQueueFrontier
 from ..models.grid import Grid
 from ..models.solution import NoSolution, Solution

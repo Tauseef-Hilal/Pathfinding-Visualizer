@@ -1,10 +1,21 @@
-from typing import Optional, Protocol
+from typing import Callable, Optional
 from enum import Enum
 import math
 import pygame
 
 
-from .constants import DARK, FONT_14, GOAL, GRAY, GREEN, GREEN_2, START, WEIGHT
+from .constants import (
+    DARK,
+    FONT_14,
+    GOAL,
+    GRAY,
+    GREEN,
+    START,
+    WEIGHT,
+    MIN_SIZE,
+    MAX_SIZE,
+    CELL_SIZE
+)
 
 
 class Animation(Enum):
@@ -13,9 +24,7 @@ class Animation(Enum):
     PATH_ANIMATION = "PATH_ANIMATION"
 
 
-class AnimationCallback(Protocol):
-    def __call__(self) -> None:
-        return None
+AnimationCallback = Callable[[], None]
 
 
 class AnimatingNode:
@@ -161,12 +170,12 @@ class Animator:
         # Calculate size as per ease-out func
         if node.progress < node.duration / 2:
             size = self._ease_out_sine(
-                node.progress, 9, 36 - 9, node.duration / 2
+                node.progress, MIN_SIZE, MAX_SIZE - MIN_SIZE, node.duration / 2
             )
         else:
             size = self._ease_out_sine(
                 node.progress - node.duration / 2,
-                36, 30 - 36, node.duration / 2
+                MAX_SIZE, CELL_SIZE - MAX_SIZE, node.duration / 2
             )
 
         # Update size
@@ -186,13 +195,13 @@ class Animator:
         # Calculate size as per ease-out func
         if node.progress < node.duration / 2:
             size = self._ease_out_sine(
-                node.progress, 9, 36 - 9, node.duration / 2
+                node.progress, MIN_SIZE, MAX_SIZE - MIN_SIZE, node.duration / 2
             )
 
         else:
             size = self._ease_out_sine(
                 node.progress - node.duration / 2,
-                36, 30 - 36, node.duration / 2
+                MAX_SIZE, CELL_SIZE - MAX_SIZE, node.duration / 2
             )
 
         # Update size
@@ -215,11 +224,11 @@ class Animator:
         elif node.progress < 0.75 * node.duration:
             duration = 0.75 * node.duration
             size = self._ease_out_sine(
-                node.progress, 9, 36 - 9, duration
+                node.progress, MIN_SIZE, MAX_SIZE - MIN_SIZE, duration
             )
 
             border_radius = int(0.40 * size)
-            if size > 30:
+            if size > CELL_SIZE:
                 border_radius = int(0.12 * size)
 
         else:
@@ -227,7 +236,7 @@ class Animator:
             progress = node.progress - 0.75 * node.duration
             size = self._ease_out_sine(
                 progress,
-                36, 30 - 36, duration
+                MAX_SIZE, CELL_SIZE - MAX_SIZE, duration
             )
             border_radius = 0
 

@@ -217,7 +217,7 @@ class Maze:
             bool: Whether mouse is within the maze
         """
         return all((
-            pos[0] > CELL_SIZE // 2,
+            pos[0] > REMAINDER_W // 2,
             pos[0] < WIDTH - REMAINDER_W // 2,
 
             pos[1] > HEADER_HEIGHT,
@@ -247,7 +247,7 @@ class Maze:
                 x, y = self.coords[i][j]
 
                 for animating_node in self.animator.nodes_to_animate:
-                    if animating_node.center == (x + 15, y + 15) \
+                    if animating_node.center == (x + CELL_SIZE // 2, y + CELL_SIZE // 2) \
                             and animating_node.progress > 0:
 
                         self._draw_rect(
@@ -298,7 +298,7 @@ class Maze:
             nodes_to_animate.append(
                 AnimatingNode(
                     rect=pygame.Rect(0, 0, 9, 9),
-                    center=(x + 15, y + 15),
+                    center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                     value="#",
                     ticks=pygame.time.get_ticks(),
                     color=DARK
@@ -314,7 +314,7 @@ class Maze:
             nodes_to_animate.append(
                 AnimatingNode(
                     rect=pygame.Rect(0, 0, 9, 9),
-                    center=(x + 15, y + 15),
+                    center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                     value="#",
                     ticks=pygame.time.get_ticks(),
                     color=DARK
@@ -330,7 +330,7 @@ class Maze:
             nodes_to_animate.append(
                 AnimatingNode(
                     rect=pygame.Rect(0, 0, 9, 9),
-                    center=(x + 15, y + 15),
+                    center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                     value="#",
                     ticks=pygame.time.get_ticks(),
                     color=DARK
@@ -341,7 +341,7 @@ class Maze:
             nodes_to_animate.append(
                 AnimatingNode(
                     rect=pygame.Rect(0, 0, 9, 9),
-                    center=(x + 15, y + 15),
+                    center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                     value="#",
                     ticks=pygame.time.get_ticks(),
                     color=DARK
@@ -394,7 +394,7 @@ class Maze:
             x, y = self.coords[cell[0]][cell[1]]
             nodes.append(
                 AnimatingNode(
-                    center=(x + 15, y + 15),
+                    center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                     rect=pygame.Rect(0, 0, 30, 30),
                     ticks=pygame.time.get_ticks(),
                     value="V",
@@ -427,7 +427,7 @@ class Maze:
             x, y = self.coords[cell[0]][cell[1]]
             nodes.append(
                 AnimatingNode(
-                    center=(x + 15, y + 15),
+                    center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                     rect=pygame.Rect(0, 0, 9, 9),
                     ticks=self.animator.nodes_to_animate[0].ticks,
                     value="*",
@@ -436,7 +436,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes, delay=900, gap=20)
+        self.animator.add_nodes_to_animate(nodes, delay=800, gap=30)
         self.animator.nodes_to_animate[-1].after_animation = after_animation
 
     def _draw_rect(
@@ -480,7 +480,8 @@ class Maze:
 
         # Draw images if needed
         if (n := self.maze[row][col]).cost > 1:
-            image_rect = WEIGHT.get_rect(center=(x + 15, y + 15))
+            image_rect = WEIGHT.get_rect(
+                center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2))
             self.surface.blit(WEIGHT, image_rect)
 
             text = FONT_14.render(
@@ -491,9 +492,11 @@ class Maze:
             self.surface.blit(text, text_rect)
 
         elif (row, col) == self.start:
-            image_rect = START.get_rect(center=(x + 15, y + 15))
+            image_rect = START.get_rect(
+                center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2))
             self.surface.blit(START, image_rect)
 
         elif (row, col) == self.goal:
-            image_rect = GOAL.get_rect(center=(x + 15, y + 15))
+            image_rect = GOAL.get_rect(
+                center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2))
             self.surface.blit(GOAL, image_rect)

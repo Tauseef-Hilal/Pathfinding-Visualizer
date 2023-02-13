@@ -32,7 +32,7 @@ if REMAINDER_W == 0:
 
 REMAINDER_H = (HEIGHT - HEADER_HEIGHT) % CELL_SIZE
 if REMAINDER_H == 0:
-    REMAINDER_H = CELL_SIZE // 2
+    REMAINDER_H = CELL_SIZE 
 
 MAZE_WIDTH = WIDTH - REMAINDER_W
 MAZE_HEIGHT = HEIGHT - HEADER_HEIGHT - REMAINDER_H
@@ -47,3 +47,7 @@ START = pygame.image.load("assets/images/triangle.png")
 GOAL = pygame.image.load("assets/images/circle.png")
 FONT_14 = pygame.font.Font("assets/fonts/Montserrat-Regular.ttf", 14)
 FONT_18 = pygame.font.Font("assets/fonts/Montserrat-Regular.ttf", 18)
+
+# Animations
+MIN_SIZE = 0.3 * CELL_SIZE
+MAX_SIZE = 1.2 * CELL_SIZE

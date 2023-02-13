@@ -16,7 +16,8 @@ class Solution:
         self.time = time
 
     def __repr__(self) -> str:
-        return f"Solution([{self.path[0]}, ..., {self.path[-1]}], {'{...}'}, {self.time})"
+        return (f"Solution([{self.path[0]}, ..., {self.path[-1]}],"
+                f" {'{...}'}, {self.time})")
 
 
 class NoSolution(Solution):
@@ -24,4 +25,5 @@ class NoSolution(Solution):
 
     def __repr__(self) -> str:
         explored = list(self.explored)
-        return f"Solution([], {'{'}{explored[0]}, {explored[1]}, ...{'}'}, {self.time})"
+        return (f"NoSolution([], {'{'}{explored[0]}, {explored[1]},"
+                f" ...{'}'}, {self.time})")
