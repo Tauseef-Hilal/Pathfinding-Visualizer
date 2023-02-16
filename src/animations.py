@@ -70,7 +70,7 @@ class Animator:
         self.maze: Maze = maze
 
         self.animating = False
-        self.nodes_to_animate: list[AnimatingNode] = []
+        self.nodes_to_animate: dict[tuple[int, int], list[AnimatingNode]] = {}
         self.need_update = False
 
     def add_nodes_to_animate(
@@ -88,39 +88,50 @@ class Animator:
 
         # Update first node's ticks and add it to the list
         if len(self.nodes_to_animate):
-            nodes[0].ticks = self.nodes_to_animate[-1].ticks + delay
+            last_node = list(self.nodes_to_animate.values())[-1][0]
+            nodes[0].ticks = last_node.ticks + last_node.duration + delay
 
-        self.nodes_to_animate.append(nodes[0])
+        self.nodes_to_animate[nodes[0].center] = self.nodes_to_animate.get(
+            nodes[0].center,
+            []
+        )
+        self.nodes_to_animate[nodes[0].center].append(nodes[0])
 
         # Rest of the nodes
         for i in range(1, len(nodes)):
             nodes[i].ticks = nodes[i - 1].ticks + gap
-            self.nodes_to_animate.append(nodes[i])
+            self.nodes_to_animate[nodes[i].center] = self.nodes_to_animate.get(
+                nodes[i].center,
+                []
+            )
+            self.nodes_to_animate[nodes[i].center].append(nodes[i])
 
         self.need_update = True
 
     def animate_nodes(self):
         """Animate nodes in the nodes_to_animate list
         """
-        if not self.nodes_to_animate:
-            return
-
         # Update starting time for animating nodes
         if self.need_update:
-            for node in self.nodes_to_animate:
-                if not node.time_updated:
-                    node.ticks += (pygame.time.get_ticks() - node.start)
-                    node.time_updated = True
+            for center in self.nodes_to_animate:
+                for node in self.nodes_to_animate[center]:
+                    if not node.time_updated:
+                        node.ticks += (pygame.time.get_ticks() - node.start)
+                        node.time_updated = True
 
             self.need_update = False
 
         # Animate every node
-        for node in self.nodes_to_animate[:]:
-            node.progress += pygame.time.get_ticks() - node.ticks
-            node.ticks = pygame.time.get_ticks()
+        for center in list(self.nodes_to_animate.keys()):
+            for i in range(len(self.nodes_to_animate[center]) - 1, -1, -1):
+                node = self.nodes_to_animate[center][i]
+                node.progress += pygame.time.get_ticks() - node.ticks
+                node.ticks = pygame.time.get_ticks()
 
-            if node.progress < 0:
-                return
+                if node.progress > 0:
+                    break
+            else:
+                continue
 
             # Call respective functions
             if node.animation == Animation.WALL_ANIMATION:
@@ -153,9 +164,12 @@ class Animator:
 
             # Update maze node and remove current animating node
             if node.progress >= node.duration:
-                pos = self.maze.get_cell_pos(node.rect.topleft)
+                pos = self.maze.get_cell_pos(node.center)
                 self.maze.set_cell(pos, node.value)
-                self.nodes_to_animate.remove(node)
+
+                self.nodes_to_animate[center].pop(0)
+                if not self.nodes_to_animate[center]:
+                    self.nodes_to_animate.pop(center)
 
                 if node.after_animation:
                     node.after_animation()

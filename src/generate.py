@@ -3,7 +3,7 @@ from typing import Any, Callable
 import pygame
 
 from .animations import AnimatingNode, Animation, Animator
-from .constants import CELL_SIZE, DARK, GREEN_2, BLUE_2, WHITE
+from .constants import CELL_SIZE, DARK, GREEN_2, BLUE_2, MIN_SIZE, WHITE
 
 
 GenerationCallback = Callable[[], None]
@@ -114,7 +114,7 @@ class MazeGenerator:
                 x, y = self.maze.coords[wall[0]][wall[1]]
                 nodes_to_animate.append(
                     AnimatingNode(
-                        rect=pygame.Rect(0, 0, 9, 9),
+                        rect=pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE),
                         center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                         value="1",
                         ticks=pygame.time.get_ticks(),
@@ -125,7 +125,7 @@ class MazeGenerator:
                 x, y = self.maze.coords[cell[0]][cell[1]]
                 nodes_to_animate.append(
                     AnimatingNode(
-                        rect=pygame.Rect(0, 0, 9, 9),
+                        rect=pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE),
                         center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                         value="1",
                         ticks=pygame.time.get_ticks(),
@@ -179,7 +179,7 @@ class MazeGenerator:
                 x, y = self.maze.coords[next[0]][next[1]]
                 nodes_to_animate.append(
                     AnimatingNode(
-                        rect=pygame.Rect(0, 0, 9, 9),
+                        rect=pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE),
                         center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                         value="1",
                         ticks=pygame.time.get_ticks(),
@@ -193,7 +193,7 @@ class MazeGenerator:
 
                 nodes_to_animate.append(
                     AnimatingNode(
-                        rect=pygame.Rect(0, 0, 9, 9),
+                        rect=pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE),
                         center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                         value="1",
                         ticks=pygame.time.get_ticks(),
@@ -222,7 +222,7 @@ class MazeGenerator:
                 x, y = self.maze.coords[colIdx][rowIdx]
                 nodes.append(
                     AnimatingNode(
-                        rect=pygame.Rect(0, 0, 9, 9),
+                        rect=pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE),
                         center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                         ticks=pygame.time.get_ticks(),
                         value="9",
@@ -245,7 +245,7 @@ class MazeGenerator:
                 x, y = self.maze.coords[colIdx][rowIdx]
                 nodes.append(
                     AnimatingNode(
-                        rect=pygame.Rect(0, 0, 9, 9),
+                        rect=pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE),
                         center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                         ticks=pygame.time.get_ticks(),
                         value="#",
@@ -344,7 +344,7 @@ class MazeGenerator:
                 continue
 
             # Create a rectangle
-            rect = pygame.Rect(0, 0, 9, 9)
+            rect = pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE)
 
             # Set the starting position of the rectangle
             x, y = self.maze.coords[wall_coords[0]][wall_coords[1]]
@@ -358,6 +358,6 @@ class MazeGenerator:
                     color=DARK
                 )
             )
-        self.maze.animator.add_nodes_to_animate(nodes_to_animate)
+        self.maze.animator.add_nodes_to_animate(nodes_to_animate, delay=-300)
 
         return wall

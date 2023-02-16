@@ -29,6 +29,7 @@ from .constants import (
     GREEN_2,
     HEADER_HEIGHT,
     BLUE_2,
+    MIN_SIZE,
     WHITE,
     WIDTH,
     HEIGHT,
@@ -395,7 +396,7 @@ def main() -> None:
 
                 if cell_under_mouse != (row, col):
                     if maze.get_cell_value((row, col)) in ("1", "V", "*"):
-                        rect = pygame.Rect(0, 0, 9, 9)
+                        rect = pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE)
                         x, y = maze.coords[row][col]
 
                         if draw_weighted_nodes and key:
@@ -536,21 +537,21 @@ def draw() -> None:
     y = top.bottom + 20
     for text in texts:
         # Rectangle (Symbol)
-        pygame.draw.rect(WINDOW, texts[text], (x, y, CELL_SIZE, CELL_SIZE))
-        pygame.draw.rect(WINDOW, GRAY, (x, y, CELL_SIZE, CELL_SIZE), width=1)
+        pygame.draw.rect(WINDOW, texts[text], (x, y, 30, 30))
+        pygame.draw.rect(WINDOW, GRAY, (x, y, 30, 30), width=1)
 
         # Text (Meaning)
         text_surf = FONT_18.render(text, True, DARK)
         text_rect = text_surf.get_rect()
-        text_rect.centery = y + CELL_SIZE // 2
+        text_rect.centery = y + 30 // 2
 
-        WINDOW.blit(text_surf, (x + CELL_SIZE + 10, text_rect.y))
+        WINDOW.blit(text_surf, (x + 30 + 10, text_rect.y))
 
         # Formating
         if texts[text] == DARK:
             y += text_surf.get_height() + 30
         elif text != "Weighted Node":
-            x += CELL_SIZE + 10 + text_surf.get_width() + 75
+            x += 30 + 10 + text_surf.get_width() + 75
 
         # Draw images for weighted, start and target node
         if text == "Weighted Node":

@@ -109,7 +109,7 @@ class Button(Widget):
 
         # Check mouseover and clicked conditions
         action = self.rect.collidepoint(pos) \
-            and pygame.mouse.get_pressed()[0] == 1
+            and pygame.mouse.get_pressed()[0]
 
         # Draw button
         pygame.draw.rect(self.screen, self.background_color, self.rect)

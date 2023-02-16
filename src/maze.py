@@ -14,6 +14,7 @@ from .constants import (
     DARK_BLUE_2,
     GOAL,
     HEIGHT,
+    MIN_SIZE,
     REMAINDER_H,
     REMAINDER_W,
     START,
@@ -240,23 +241,27 @@ class Maze:
 
     def draw(self) -> None:
         """Draw maze"""
+        nodes_to_animate = self.animator.nodes_to_animate
 
         # Draw every cell on the screen
         for i, row in enumerate(self.maze):
             for j, node in enumerate(row):
                 x, y = self.coords[i][j]
+                center = (x + CELL_SIZE // 2, y + CELL_SIZE // 2)
 
-                for animating_node in self.animator.nodes_to_animate:
-                    if animating_node.center == (x + CELL_SIZE // 2, y + CELL_SIZE // 2) \
-                            and animating_node.progress > 0:
+                if not center in nodes_to_animate:
+                    self._draw_rect((i, j), node.color)
+                    continue
 
+                for k in range(len(nodes_to_animate[center]) - 1, -1, -1):
+                    animating_node = nodes_to_animate[center][k]
+                    if animating_node.progress > 0:
                         self._draw_rect(
                             coords=(i, j),
                             color=animating_node.color,
                             node=animating_node
                         )
                         break
-
                 else:
                     self._draw_rect((i, j), node.color)
 
@@ -285,7 +290,8 @@ class Maze:
             case "Basic Random Maze":
                 self.generator.basic_random_maze()
 
-        self.animator.nodes_to_animate[-1].after_animation = after_generation
+        list(self.animator.nodes_to_animate.values()
+             )[-1][-1].after_animation = after_generation
 
     def _draw_walls_around(self) -> None:
         """Draw walls around the maze
@@ -297,7 +303,7 @@ class Maze:
             x, y = self.coords[0][i]
             nodes_to_animate.append(
                 AnimatingNode(
-                    rect=pygame.Rect(0, 0, 9, 9),
+                    rect=pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE),
                     center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                     value="#",
                     ticks=pygame.time.get_ticks(),
@@ -305,7 +311,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes_to_animate)
+        self.animator.add_nodes_to_animate(nodes_to_animate, delay=-300)
 
         # Bottom horizontal
         nodes_to_animate = []
@@ -313,7 +319,7 @@ class Maze:
             x, y = self.coords[-1][i]
             nodes_to_animate.append(
                 AnimatingNode(
-                    rect=pygame.Rect(0, 0, 9, 9),
+                    rect=pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE),
                     center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                     value="#",
                     ticks=pygame.time.get_ticks(),
@@ -321,7 +327,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes_to_animate)
+        self.animator.add_nodes_to_animate(nodes_to_animate, delay=-300)
 
         # Sides
         nodes_to_animate = []
@@ -329,7 +335,7 @@ class Maze:
             x, y = self.coords[i][0]
             nodes_to_animate.append(
                 AnimatingNode(
-                    rect=pygame.Rect(0, 0, 9, 9),
+                    rect=pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE),
                     center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                     value="#",
                     ticks=pygame.time.get_ticks(),
@@ -340,7 +346,7 @@ class Maze:
             x, y = self.coords[i][-1]
             nodes_to_animate.append(
                 AnimatingNode(
-                    rect=pygame.Rect(0, 0, 9, 9),
+                    rect=pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE),
                     center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
                     value="#",
                     ticks=pygame.time.get_ticks(),
@@ -348,7 +354,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes_to_animate)
+        self.animator.add_nodes_to_animate(nodes_to_animate, delay=-300)
 
     def solve(self, algo_name: str,) -> Solution:
         """Solve the maze with an algorithm
@@ -395,7 +401,7 @@ class Maze:
             nodes.append(
                 AnimatingNode(
                     center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
-                    rect=pygame.Rect(0, 0, 30, 30),
+                    rect=pygame.Rect(0, 0, CELL_SIZE, CELL_SIZE),
                     ticks=pygame.time.get_ticks(),
                     value="V",
                     color=WHITE,
@@ -418,7 +424,7 @@ class Maze:
         self.animator.add_nodes_to_animate(nodes, gap=gap)
 
         if not solution.path:
-            self.animator.nodes_to_animate[-1].after_animation = after_animation
+            nodes[-1].after_animation = after_animation
             return
 
         # Color the shortest path in yellowd
@@ -428,16 +434,24 @@ class Maze:
             nodes.append(
                 AnimatingNode(
                     center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2),
-                    rect=pygame.Rect(0, 0, 9, 9),
-                    ticks=self.animator.nodes_to_animate[0].ticks,
+                    rect=pygame.Rect(0, 0, MIN_SIZE, MIN_SIZE),
+                    ticks=pygame.time.get_ticks(),
                     value="*",
                     color=YELLOW,
                     duration=1000,
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes, delay=800, gap=30)
-        self.animator.nodes_to_animate[-1].after_animation = after_animation
+        match gap:
+            case 5:
+                gap = 30
+            case 30:
+                gap = 50
+            case 1000:
+                gap = 50
+
+        self.animator.add_nodes_to_animate(nodes, delay=-1500, gap=gap)
+        nodes[-1].after_animation = after_animation
 
     def _draw_rect(
             self,
