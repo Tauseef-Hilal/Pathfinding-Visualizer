@@ -358,6 +358,6 @@ class MazeGenerator:
                     color=DARK
                 )
             )
-        self.maze.animator.add_nodes_to_animate(nodes_to_animate, delay=-300)
+        self.maze.animator.add_nodes_to_animate(nodes_to_animate)
 
         return wall

@@ -89,7 +89,7 @@ class Animator:
         # Update first node's ticks and add it to the list
         if len(self.nodes_to_animate):
             last_node = list(self.nodes_to_animate.values())[-1][0]
-            nodes[0].ticks = last_node.ticks + last_node.duration + delay
+            nodes[0].ticks = last_node.ticks + delay
 
         self.nodes_to_animate[nodes[0].center] = self.nodes_to_animate.get(
             nodes[0].center,

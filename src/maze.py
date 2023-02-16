@@ -311,7 +311,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes_to_animate, delay=-300)
+        self.animator.add_nodes_to_animate(nodes_to_animate)
 
         # Bottom horizontal
         nodes_to_animate = []
@@ -327,7 +327,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes_to_animate, delay=-300)
+        self.animator.add_nodes_to_animate(nodes_to_animate)
 
         # Sides
         nodes_to_animate = []
@@ -354,7 +354,7 @@ class Maze:
                 )
             )
 
-        self.animator.add_nodes_to_animate(nodes_to_animate, delay=-300)
+        self.animator.add_nodes_to_animate(nodes_to_animate)
 
     def solve(self, algo_name: str,) -> Solution:
         """Solve the maze with an algorithm
@@ -450,7 +450,7 @@ class Maze:
             case 1000:
                 gap = 50
 
-        self.animator.add_nodes_to_animate(nodes, delay=-1500, gap=gap)
+        self.animator.add_nodes_to_animate(nodes, delay=0, gap=gap)
         nodes[-1].after_animation = after_animation
 
     def _draw_rect(
