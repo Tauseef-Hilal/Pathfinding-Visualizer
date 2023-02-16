@@ -1,4 +1,6 @@
+import sys
 import pygame
+
 pygame.font.init()
 pygame.display.init()
 
@@ -25,6 +27,20 @@ HEADER_HEIGHT = 200
 
 # Maze
 CELL_SIZE = 26
+if len(sys.argv) > 1:
+    arg = sys.argv[1]
+
+    try:
+        assert arg.startswith("--cell-size:") == True
+
+        size = arg.split(":")[1]
+        size = int(size)
+
+        CELL_SIZE = size
+    except:
+        print("\nInvalid command line arguments")
+        print("USAGE: python3 run.pyw [ --cell-size:<int> ]")
+        exit(1)
 
 REMAINDER_W = WIDTH % CELL_SIZE
 if REMAINDER_W == 0:
@@ -32,7 +48,7 @@ if REMAINDER_W == 0:
 
 REMAINDER_H = (HEIGHT - HEADER_HEIGHT) % CELL_SIZE
 if REMAINDER_H == 0:
-    REMAINDER_H = CELL_SIZE 
+    REMAINDER_H = CELL_SIZE
 
 MAZE_WIDTH = WIDTH - REMAINDER_W
 MAZE_HEIGHT = HEIGHT - HEADER_HEIGHT - REMAINDER_H
