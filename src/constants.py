@@ -36,6 +36,9 @@ if len(sys.argv) > 1:
         size = arg.split(":")[1]
         size = int(size)
 
+        if size < 10:
+            size = 10
+
         CELL_SIZE = size
     except:
         print("\nInvalid command line arguments")
