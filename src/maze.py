@@ -63,12 +63,9 @@ class Maze:
                       for colIdx in range(self.width)]
                      for rowIdx in range(self.height)]
 
-        start_col = 10
-        goal_col = self.width - 11
-        if start_col == goal_col:
-            start_col -= 1
-            goal_col += 1
-        elif start_col > goal_col:
+        start_col = self.width // 4
+        goal_col = self.width - self.width // 4 - 1
+        if start_col > goal_col:
             start_col, goal_col = goal_col, start_col
 
         self.start = (self.height // 2, start_col)
