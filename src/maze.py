@@ -63,11 +63,18 @@ class Maze:
                       for colIdx in range(self.width)]
                      for rowIdx in range(self.height)]
 
-        self.start = (self.height // 2, 10)
+        start_col = 10
+        goal_col = self.width - 11
+        if start_col == goal_col:
+            start_col -= 1
+            goal_col += 1
+        elif start_col > goal_col:
+            start_col, goal_col = goal_col, start_col
+
+        self.start = (self.height // 2, start_col)
+        self.goal = (self.height // 2, goal_col)
         self.maze[self.start[0]][self.start[1]].value = "A"
         self.maze[self.start[0]][self.start[1]].cost = 0
-
-        self.goal = (self.height // 2, self.width - 11)
         self.maze[self.goal[0]][self.goal[1]].value = "B"
         self.maze[self.goal[0]][self.goal[1]].cost = 1
 

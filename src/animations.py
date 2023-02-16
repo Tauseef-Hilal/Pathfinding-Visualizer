@@ -129,6 +129,7 @@ class Animator:
                 node.ticks = pygame.time.get_ticks()
 
                 if node.progress > 0:
+                    self.nodes_to_animate[center][:i] = []
                     break
             else:
                 continue
@@ -167,7 +168,7 @@ class Animator:
                 pos = self.maze.get_cell_pos(node.center)
                 self.maze.set_cell(pos, node.value)
 
-                self.nodes_to_animate[center].pop(0)
+                self.nodes_to_animate[center].remove(node)
                 if not self.nodes_to_animate[center]:
                     self.nodes_to_animate.pop(center)
 

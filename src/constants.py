@@ -38,6 +38,8 @@ if len(sys.argv) > 1:
 
         if size < 10:
             size = 10
+        elif size > 90:
+            size = 90
 
         CELL_SIZE = size
     except:

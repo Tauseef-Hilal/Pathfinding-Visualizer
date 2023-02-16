@@ -669,7 +669,7 @@ def draw() -> None:
             elif "Basic Random" in algorithm:
                 new_text = "Generating maze randomly"
             else:
-                new_text = f"Generating maze by {algorithm}"
+                new_text = f"Generating maze using {algorithm}"
 
             state.label = Label(
                 new_text, "center", 0,
@@ -754,7 +754,7 @@ def run_all(algo_idx: int, maze_idx: int = -1) -> None:
             elif "Basic Random" in algorithm:
                 new_text = "Generating maze randomly"
             else:
-                new_text = f"Generating maze by {algorithm}"
+                new_text = f"Generating maze using {algorithm}"
 
             state.label = Label(
                 new_text, "center", 0,
