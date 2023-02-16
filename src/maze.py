@@ -457,7 +457,7 @@ class Maze:
             case 1000:
                 gap = 50
 
-        self.animator.add_nodes_to_animate(nodes, delay=0, gap=gap)
+        self.animator.add_nodes_to_animate(nodes, delay=400, gap=gap)
         nodes[-1].after_animation = after_animation
 
     def _draw_rect(
