@@ -51,6 +51,7 @@ https://user-images.githubusercontent.com/67793598/218127466-38274684-5eb6-44e9-
 * Option to place obstacles on the grid to create custom maps.
 * Selectable starting and ending points on the grid.
 * Configurable speed of the animation. 
+* Configurable grid size
 * Clean and intuitive user interface.
 
 ## Supported Algorithms
